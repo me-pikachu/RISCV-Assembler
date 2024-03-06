@@ -1,7 +1,10 @@
 #include <iostream>
+#include "../lexical/lexical_analyser.hpp"
 
 using namespace std;
+
 string s[6];
+
 string lex(){
     return s[0];
 }
@@ -180,10 +183,4 @@ string* getcmd(){
         }
     }
     return s;
-    
-}
-
-int main(){
-    
-    return 0;
 }

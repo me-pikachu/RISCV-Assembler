@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include "../syntax/syntax_analyser.hpp"
 
 using namespace std;
 
@@ -387,6 +388,7 @@ bool generateBinCmd(){
 					bincmd = bincmd + func7;
 					bool* binimd = Dec2Bin(num, 5); // immediate is of 5 bits
 					// adding the 12 bits of immediate
+					char digchar;
 					for (int j=4; j>=0; j--){
 						digchar = '0' + binimd[j];
 						bincmd = bincmd + digchar;
@@ -403,6 +405,7 @@ bool generateBinCmd(){
 				bool* binimd = Dec2Bin(str2num(cmd[4]), 12); // immediate is of 12 bits
 			
 				// adding the 12 bits of immediate
+				char digchar;
 				for (int j=11; j>=0; j--){
 					digchar = '0' + binimd[j];
 					bincmd = bincmd + digchar;
@@ -416,6 +419,7 @@ bool generateBinCmd(){
 			bool* binimd = Dec2Bin(str2num(cmd[4]), 12); // immediate is of 12 bits
 			
 			// imd[11:5]
+			char digchar;
 			for (int j=11; j>=5; j--){
 				digchar = '0' + binimd[j];
 				bincmd = bincmd + digchar;
@@ -435,6 +439,7 @@ bool generateBinCmd(){
 			bool* binimd = Dec2Bin(str2num(cmd[4]), 20); // immediate is of 20 bits
 			
 			// imm[31:12] all the lower bits would be 0
+			char digchar;
 			for (int j=19; j>=0; j--){
 				digchar = '0' + binimd[j];
 				bincmd = bincmd + digchar;
@@ -449,11 +454,140 @@ bool generateBinCmd(){
 		
 		PCbincmd.insert(pair<int, string>(PC, bincmd));
 		PC = PC + 4;
+		return 1;
 	}
 }
 
 void update_unfinished_cmd(){
 	
+	// iterate over every unfinished command
+	for (int i : unfinished_cmd){
+		string cmd;
+		string bincmd = "";
+		for (auto it = PCbincmd.begin(); it != PCbincmd.end(); ++it){
+			if (it->first == i){
+				cmd = it->second;
+			}
+		}
+		
+		string cmd_name = "";
+		int j = 0;
+		for (j=0; j<cmd.length(); j++){
+			if (cmd[j] == ',') break;
+			cmd_name = cmd_name + cmd[j];
+		}
+		
+		string rd = "";
+		for (j=j+1; j<cmd.length(); j++){
+			if (cmd[j] == ',') break;
+			rd = rd + cmd[j];
+		}
+		
+		string rs1 = "";
+		for (j=j+1; j<cmd.length(); j++){
+			if (cmd[j] == ',') break;
+			rs1 = rs1 + cmd[j];
+		}
+		
+		string rs2 = "";
+		for (j=j+1; j<cmd.length(); j++){
+			if (cmd[j] == ',') break;
+			rs2 = rs2 + cmd[j];
+		}
+		
+		string imm = "";
+		for (j=j+1; j<cmd.length(); j++){
+			if (cmd[j] == ',') break;
+			imm = imm + cmd[j];
+		}
+		
+		string label_name = "";
+		for (j=j+1; j<cmd.length(); j++){
+			label_name = label_name + cmd[j];
+		}
+		
+		int offset = 0;
+		for(auto j = labelPC.begin(); j != labelPC.end(); ++j){
+			if (j->first == label_name){
+				// we have the PC of the label
+				offset = j->second - i; // i is the current PC
+				break;
+			}
+		}
+		
+		
+		
+		
+		// now cmd_name is having the command_name
+		if (cmd_name == "jal"){
+			bool* binoffset = Dec2Bin(offset, 21); // 21 bit immediate
+			char digchar;
+			
+			// imm[20]
+			digchar = '0' + binoffset[20];
+			bincmd = bincmd + digchar;
+			
+			// imm[10:1]
+			for (int k=10; k>=1; k--){
+				digchar = '0' + binoffset[k];
+				bincmd = bincmd + digchar;
+			}
+			
+			// imm[11]
+			digchar = '0' + binoffset[11];
+			bincmd = bincmd + digchar;
+			
+			// imm[19:12]
+			for (int k=19; k>=12; k--){
+				digchar = '0' + binoffset[k];
+				bincmd = bincmd + digchar;
+			}
+			
+			// rd + opcode
+			bincmd = bincmd + rd + "1101111";
+			
+		} else {
+			bool* binoffset = Dec2Bin(offset, 13); // 13 bit immediate
+			
+			// imm[12]
+			char digchar;
+			digchar = '0' + binoffset[12];
+			bincmd = bincmd + digchar;
+			
+			// imm[10:5]
+			for (int k=10; k>=5; k--){
+				digchar = '0' + binoffset[k];
+				bincmd = bincmd + digchar;
+			}
+			
+			// rs2 rs1
+			bincmd = bincmd + rs2 + rs1;
+			
+			// func3
+			if (cmd_name == "beq") bincmd = bincmd + "000";
+			else if (cmd_name == "bne") bincmd = bincmd + "001";
+			else if (cmd_name == "blt") bincmd = bincmd + "100";
+			else if (cmd_name == "bge") bincmd = bincmd + "101";
+			else if (cmd_name == "bltu") bincmd = bincmd + "110";
+			else if (cmd_name == "bgeu") bincmd = bincmd + "111";
+			else {
+				std::cout << "Cannot identify the type of branch statement\n";
+				bincmd = bincmd + "000";
+			}
+			
+			// imm[4:1]
+			for (int k=4; k>=1; k--){
+				digchar = '0' + binoffset[k];
+				bincmd = bincmd + digchar;
+			}
+			
+			// imm[11]
+			digchar = '0' + binoffset[11];
+			bincmd = bincmd + digchar;
+			
+			bincmd = bincmd + "1100011";
+		}
+	}
 }
 
 void getBinCmd(){
