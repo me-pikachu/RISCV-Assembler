@@ -199,9 +199,10 @@ int* idreg(string reg){
 // i format : lb, lh, lw, addi, ori, andi, xori, slti, sgti, slei, sgei, jalr
 // r format :
 // s format : sb, sh, sw
-// sb format :
-// u format : auipc
-// uj format :
+// sb format : beq, bne, blt, bgt, ble, bge
+// u format : auipc, lui
+// uj format : jal
+
 void exec_ext_bin_inst(string* ins){
 	if (ins[0] == "sb"){
 		// address is rs1 + immediate
@@ -301,8 +302,31 @@ void exec_ext_bin_inst(string* ins){
 		
 	} else if (ins[0] == "jal"){
 		// the destination register cannot be x0
-		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = binstr2dec(ins[4]) << 20; // shift by 20 bits
-		PC = PC + 4;
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = PC + 4; // shift by 20 bits
+		PC = PC + binstr2dec(ins[4]);
 		
+	} else if (ins[0] == "beq"){
+		if (idreg(ins[2]) == idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		else PC = PC + 4;
+		
+	} else if (ins[0] == "bne"){
+		if (idreg(ins[2]) != idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		else PC = PC + 4;
+		
+	} else if (ins[0] == "blt"){
+		if (idreg(ins[2]) < idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		else PC = PC + 4;
+		
+	} else if (ins[0] == "bgt"){
+		if (idreg(ins[2]) > idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		else PC = PC + 4;
+		
+	} else if (ins[0] == "ble"){
+		if (idreg(ins[2]) <= idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		else PC = PC + 4;
+		
+	} else if (ins[0] == "bge"){
+		if (idreg(ins[2]) >= idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		else PC = PC + 4;
 	}
 }
