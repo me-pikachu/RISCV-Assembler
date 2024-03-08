@@ -56,7 +56,7 @@ void error(){
 
 //function to check if the given register is in range of register (ie 0-31) or not
 bool check_register(string c){
-    if(c[0]=='x' && c.length()==2 && (c[1]=='0'||c[1]=='1' ||c[1]=='2' ||c[1]=='3' ||c[1]=='4' ||c[1]=='5' ||c[1]=='6' ||c[1]=='7' ||c[1]=='8' ||c[1]=='9')) return true;
+    if(c[0]=='x' && c.length()==2 && (c[1]=='0'||c[1]=='1'||c[1]=='2'||c[1]=='3'||c[1]=='4'||c[1]=='5'||c[1]=='6'||c[1]=='7'||c[1]=='8'||c[1]=='9')) return true;
     else if(c[0]=='x' && c.length()==3){
         if((c[1]=='1'||c[1]=='2') && (c[2]=='0'||c[2]=='1'||c[2]=='2'||c[2]=='3'||c[2]=='4'||c[2]=='5'||c[2]=='6'||c[2]=='7'||c[2]=='8'||c[2]=='9')){
             return true;
@@ -74,7 +74,7 @@ string* getcmd(){
     string c=lex();
     unsigned long length=c.length();
     while(c=="\n") c=lex();
-    if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"||                      c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){
+    if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"||c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){
         s[0]=c;
         c=lex();
         if(check_register(c)) {
