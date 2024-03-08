@@ -2,18 +2,17 @@
 #include "../lexical/lexical_analyser.hpp"
 
 using namespace std;
-
 string s[6];
-
 string lex(){
-    return s[0];
+    string c;
+    return c;
 }
 
 //function to convert string to int
 int str2int(string c){
     int n=0;
     int i=1;
-    int k=c.length();
+    unsigned long k=c.length();
     while(k--){
         n=n*10;
         n=n+(int)c[i];
@@ -46,7 +45,7 @@ string bin_index(string c){
 
 //function to return error if the syntax is not correct
 void error(){
-    cout << "ERROR IN SYNTAX";
+    cout << "ERROR IN SYNTAX\n";
     s[0]='0';
     s[1]='0';
     s[2]='0';
@@ -73,114 +72,157 @@ bool check_register(string c){
 //function to check syntax and return the tokens in form of a string array
 string* getcmd(){
     string c=lex();
+    unsigned long length=c.length();
     while(c=="\n") c=lex();
-    if(c.length() ==2){
-        if(c[0]=='o' && c[1]=='r'){             //checking if the command is or
-            s[0]=c;
-            c=lex();
-            if(check_register(c)) {
-                s[1]=bin_index(c);
-            }
-            else error();
-            c=lex();
-            if(c!=",") error();
-            c=lex();
-            if(check_register(c)) s[2]=bin_index(c);
-            else error();
-            c=lex();
-            if(c!=",") error();
-            c=lex();
-            if(check_register(c)) s[3]=bin_index(c);
-            else error();
-            c=lex();
-            if(c!="\n") error();
-        }
-        else if(c[0]=='l' && (c[1]=='b'|| c[1]=='w'|| c[1]=='h'||c[1]=='d')){       //checking if it is a load command
-            s[0]=c;
-            c=lex();
-            if(check_register(c)) {
-                s[1]=bin_index(c);
-            }
-            else error();
-            c=lex();
-            if(c!=",") error();
-            c=lex();
-            int n=str2int(c);
-            if(n<-2048 || n>2047) error();
-            else s[4]=c;
-            c=lex();
-            if(c!="(") error();
-            c=lex();
-            if(check_register(c)) s[2]=bin_index(c);
-            else error();
-            c=lex();
-            if(c!=")") error();
-            c=lex();
-            if(c!="\n") error();
-        }
-        else if(c[0]=='s'&& (c[1]=='b'||c[1]=='w'||c[1]=='h'||c[1]=='d')){         //checking if it is a store command
-            s[0]=c;
-            c=lex();
-            if(check_register(c)) {
-                s[2]=bin_index(c);
-            }
-            else error();
-            c=lex();
-            if(c!=",") error();
-            c=lex();
-            int n=str2int(c);
-            if(n<-2048 || n>2047) error();
-            else s[4]=c;
-            c=lex();
-            if(c!="(") error();
-            c=lex();
-            if(check_register(c)) s[1]=bin_index(c);
-            else error();
-            c=lex();
-            if(c!=")") error();
-            c=lex();
-            if(c!="\n") error();
+    if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"||                      c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){
+        s[0]=c;
+        c=lex();
+        if(check_register(c)) {
+            s[1]=bin_index(c);
         }
         else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        if(check_register(c)) s[2]=bin_index(c);
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        if(check_register(c)) s[3]=bin_index(c);
+        else error();
+        c=lex();
+        if(c!="\n") error();
     }
-    else if(c.length()==3){
-        if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"|| c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"){
-            s[0]=c;
-            c=lex();
-            if(check_register(c)) {
-                s[1]=bin_index(c);
-            }
-            else error();
-            c=lex();
-            if(c!=",") error();
-            c=lex();
-            if(check_register(c)) s[2]=bin_index(c);
-            else error();
-            c=lex();
-            if(c!=",") error();
-            c=lex();
-            if(check_register(c)) s[3]=bin_index(c);
-            else error();
-            c=lex();
-            if(c!="\n") error();
+    else if(c=="ori"||c=="addi"||c=="andi"){
+        s[0]=c;
+        c=lex();
+        if(check_register(c)) {
+            s[1]=bin_index(c);
         }
-        else if(c=="beq"||c=="bne"||c=="bge"||c=="blt"){
-            s[0]=c;
-            c=lex();
-            if(check_register(c)) s[2]=bin_index(c);
-            else error();
-            c=lex();
-            if(c!=",") error();
-            c=lex();
-            if(check_register(c)) s[3]=bin_index(c);
-            else error();
-            c=lex();
-            if(c!=",") error();
-            c=lex();
-            s[5]=c;
-            c=lex();
-            if(c!="\n") error();
-        }
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        if(check_register(c)) s[2]=bin_index(c);
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        int n=str2int(c);
+        if(n<-2048 || n>2047) error();
+        else s[4]=c;
+        c=lex();
+        if(c!="\n") error();
     }
+    else if(c=="lb"||c=="ld"||c=="lw"||c=="lh"||c=="jalr"){       //checking if it is a load command
+        s[0]=c;
+        c=lex();
+        if(check_register(c)) {
+            s[1]=bin_index(c);
+        }
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        int n=str2int(c);
+        if(n<-2048 || n>2047) error();
+        else s[4]=c;
+        c=lex();
+        if(c!="(") error();
+        c=lex();
+        if(check_register(c)) s[2]=bin_index(c);
+        else error();
+        c=lex();
+        if(c!=")") error();
+        c=lex();
+        if(c!="\n") error();
+    }
+    else if(c=="sb"||c=="sd"||c=="sw"||c=="sh"){         //checking if it is a store command
+        s[0]=c;
+        c=lex();
+        if(check_register(c)) {
+            s[3]=bin_index(c);
+        }
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        int n=str2int(c);
+        if(n<-2048 || n>2047) error();
+        else s[4]=c;
+        c=lex();
+        if(c!="(") error();
+        c=lex();
+        if(check_register(c)) s[2]=bin_index(c);
+        else error();
+        c=lex();
+        if(c!=")") error();
+        c=lex();
+        if(c!="\n") error();
+    }
+    else if(c=="beq"||c=="bne"||c=="bge"||c=="blt"){
+        s[0]=c;
+        c=lex();
+        if(check_register(c)) s[2]=bin_index(c);
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        if(check_register(c)) s[3]=bin_index(c);
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        s[5]=c;
+        c=lex();
+        if(c!="\n") error();
+    }
+    else if(c=="lui" || c=="auipc"){
+        s[0]=c;
+        c=lex();
+        if(check_register(c)) {
+            s[1]=bin_index(c);
+        }
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        int m=str2int(c);
+        if(m>1048575 || m<0) error();
+        else s[4]=c;
+        c=lex();
+        if(c!="\n") error();
+    }
+    else if(c=="jal"){
+        s[0]=c;
+        c=lex();
+        if(check_register(c)) {
+            s[1]=bin_index(c);
+        }
+        else error();
+        c=lex();
+        if(c!=",") error();
+        c=lex();
+        s[5]=c;
+        c=lex();
+        if(c!="\n") error();
+    }
+    else if(c[length-1]==':'){
+        string c1;
+        for (unsigned long i=0; i<length-1;i++) {
+            c1=c1+c[i];
+        }
+        s[5]=c1;
+    }
+    else error();
     return s;
+    
+}
+
+
+
+int main(){
+    getcmd();
+    return 0;
 }
