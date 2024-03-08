@@ -197,7 +197,7 @@ int* idreg(string reg){
 
 // instruction supported : 
 // i format : lb, lh, lw, addi, ori, andi, xori, slti, sgti, slei, sgei, jalr
-// r format :
+// r format : add, sub, mul, div, rem, and, or, xor, slt, sgt, sle, sge	
 // s format : sb, sh, sw
 // sb format : beq, bne, blt, bgt, ble, bge
 // u format : auipc, lui
@@ -328,5 +328,67 @@ void exec_ext_bin_inst(string* ins){
 	} else if (ins[0] == "bge"){
 		if (idreg(ins[2]) >= idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
 		else PC = PC + 4;
+		
+	} else if (ins[0] == "add"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) + *idreg(ins[3]);
+		PC = PC + 4;
+		
+	} else if (ins[0] == "sub"){
+		// the destination register cannot be x0
+		// rs1 - rs2
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) - *idreg(ins[3]);
+		PC = PC + 4;
+		
+	} else if (ins[0] == "mul"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) * *idreg(ins[3]);
+		PC = PC + 4;
+		
+	} else if (ins[0] == "div"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = (int)(*idreg(ins[2]) / *idreg(ins[3]));
+		PC = PC + 4;
+		
+	} else if (ins[0] == "rem"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) % *idreg(ins[3]);
+		PC = PC + 4;
+		
+	} else if (ins[0] == "and"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) & *idreg(ins[3]);
+		PC = PC + 4;
+		
+	} else if (ins[0] == "or"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) | *idreg(ins[3]);
+		PC = PC + 4;
+		
+	} else if (ins[0] == "xor"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) ^ *idreg(ins[3]);
+		PC = PC + 4;
+		
+	} else if (ins[0] == "slt"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) < *idreg(ins[3]) ? 1 : 0;
+		PC = PC + 4;
+		
+	} else if (ins[0] == "sgt"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) > *idreg(ins[3]) ? 1 : 0;
+		PC = PC + 4;
+		
+	} else if (ins[0] == "sle"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) <= *idreg(ins[3]) ? 1 : 0;
+		PC = PC + 4;
+		
+	} else if (ins[0] == "sge"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) >= *idreg(ins[3]) ? 1 : 0;
+		PC = PC + 4;
+		
 	}
 }

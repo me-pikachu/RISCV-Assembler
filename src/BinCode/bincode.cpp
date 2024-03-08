@@ -135,36 +135,50 @@ bool generateBinCmd(){
 		string opcode;
 		bool insfmt;
 		
+		// instruction supported : 
+		// i format : lb, lh, lw, ld, lbu, lhu, lwu, fence, fence.i, addi, addiw, andi, ori, xori, slli, srli, srai, slliw, srliw, sraiw, slti, sltiu, sgti, sgtiu, slei, sleiu, sgei, sgeiu, jalr
+		// r format : add, sub, mul, div, rem, sll, srl, sra, and, or, xor, slt, sltu, sgt, sgtu, sle, sleu, sge, sgeu	
+		// s format : sb, sh, sw, sd
+		// sb format : beq, bne, blt, bgt, ble, bge (above)
+		// u format : auipc, lui
+		// uj format : jal (above)
+		
 		if (cmd[0] == "add"){
 			insfmt = 'r';
 			opcode = "0110011";
 			func3 = "000";
 			func7 = "0000000";
+			
 		} else if (cmd[0] == "sub"){
 			insfmt = 'r';
 			opcode = "0110011";
 			func3 = "000";
 			func7 = "0100000";
+			
+		} else if (cmd[0] == "mul"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "div"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "rem"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
 		} else if (cmd[0] == "sll"){
 			insfmt = 'r';
 			opcode = "0110011";
 			func3 = "001";
 			func7 = "0000000";
-		} else if (cmd[0] == "slt"){
-			insfmt = 'r';
-			opcode = "0110011";
-			func3 = "010";
-			func7 = "0000000";
-		} else if (cmd[0] == "sltu"){
-			insfmt = 'r';
-			opcode = "0110011";
-			func3 = "011";
-			func7 = "0000000";
-		} else if (cmd[0] == "xor"){
-			insfmt = 'r';
-			opcode = "0110011";
-			func3 = "100";
-			func7 = "0000000";
+			
 		} else if (cmd[0] == "srl"){
 			insfmt = 'r';
 			opcode = "0110011";
@@ -175,201 +189,331 @@ bool generateBinCmd(){
 			opcode = "0110011";
 			func3 = "101";
 			func7 = "0100000";
+			
+		 else if (cmd[0] == "and"){
+			insfmt = 'r';
+			opcode = "0110011";
+			func3 = "111";
+			func7 = "0000000";
+			
 		} else if (cmd[0] == "or"){
 			insfmt = 'r';
 			opcode = "0110011";
 			func3 = "110";
 			func7 = "0000000";
-		} else if (cmd[0] == "and"){
+			
+		} else if (cmd[0] == "xor"){
 			insfmt = 'r';
 			opcode = "0110011";
-			func3 = "111";
+			func3 = "100";
 			func7 = "0000000";
+			
+		} } else if (cmd[0] == "slt"){
+			insfmt = 'r';
+			opcode = "0110011";
+			func3 = "010";
+			func7 = "0000000";
+			
+		} else if (cmd[0] == "sltu"){
+			insfmt = 'r';
+			opcode = "0110011";
+			func3 = "011";
+			func7 = "0000000";
+			
+		} else if (cmd[0] == "sgt"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sgtu"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sle"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sleu"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sge"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sgeu"){
+			insfmt = 'r';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
 		} else if (cmd[0] == "sb"){
 			insfmt = 's';
 			opcode = "0100011";
 			func3 = "000";
 			func7 = "";
+			
 		} else if (cmd[0] == "sh"){
 			insfmt = 's';
 			opcode = "0100011";
 			func3 = "001";
 			func7 = "";
+			
 		} else if (cmd[0] == "sw"){
 			insfmt = 's';
 			opcode = "0100011";
 			func3 = "010";
 			func7 = "";
+			
 		} else if (cmd[0] == "sd"){
-			insfmt = 'i'; // sd is i type of instruction ????????
+			insfmt = 's';
 			opcode = "0100011";
 			func3 = "011";
 			func7 = "";
+			
 		} else if (cmd[0] == "lb"){
 			insfmt = 'i';
 			opcode = "0000011";
 			func3 = "000";
 			func7 = "";
+			
 		} else if (cmd[0] == "lh"){
 			insfmt = 'i';
 			opcode = "0000011";
 			func3 = "001";
 			func7 = "";
+			
 		} else if (cmd[0] == "lw"){
 			insfmt = 'i';
 			opcode = "0000011";
 			func3 = "010";
 			func7 = "";
+			
 		} else if (cmd[0] == "ld"){
 			insfmt = 'i';
 			opcode = "0000011";
 			func3 = "011";
 			func7 = "";
+			
 		} else if (cmd[0] == "lbu"){
 			insfmt = 'i';
 			opcode = "0000011";
 			func3 = "100";
 			func7 = "";
+			
 		} else if (cmd[0] == "lhu"){
 			insfmt = 'i';
 			opcode = "0000011";
 			func3 = "101";
 			func7 = "";
+			
 		} else if (cmd[0] == "lwu"){
 			insfmt = 'i';
 			opcode = "0000011";
 			func3 = "110";
 			func7 = "";
+			
 		} else if (cmd[0] == "fence"){
 			insfmt = 'i';
 			opcode = "0001111";
 			func3 = "000";
 			func7 = "";
+			
 		} else if (cmd[0] == "fence.i"){
 			insfmt = 'i';
 			opcode = "0001111";
 			func3 = "001";
 			func7 = "";
+			
 		} else if (cmd[0] == "addi"){
 			insfmt = 'i';
 			opcode = "0010011";
 			func3 = "000";
 			func7 = "";
-		} else if (cmd[0] == "slli"){
-			insfmt = 'i';
-			opcode = "0010011";
-			func3 = "001";
-			func7 = "0000000";
-		} else if (cmd[0] == "slti"){
-			insfmt = 'i';
-			opcode = "0010011";
-			func3 = "010";
-			func7 = "";
-		} else if (cmd[0] == "sltiu"){
-			insfmt = 'i';
-			opcode = "0010011";
-			func3 = "011";
-			func7 = "";
-		} else if (cmd[0] == "xori"){
-			insfmt = 'i';
-			opcode = "0010011";
-			func3 = "100";
-			func7 = "";
-		} else if (cmd[0] == "srli"){
-			insfmt = 'i';
-			opcode = "0010011";
-			func3 = "101";
-			func7 = "0000000";
-		} else if (cmd[0] == "srai"){
-			insfmt = 'i';
-			opcode = "0010011";
-			func3 = "101";
-			func7 = "0100000";
-		} else if (cmd[0] == "ori"){
-			insfmt = 'i';
-			opcode = "0010011";
-			func3 = "110";
-			func7 = "";
-		} else if (cmd[0] == "andi"){
-			insfmt = 'r';
-			opcode = "0010011";
-			func3 = "111";
-			func7 = "";
+			
 		} else if (cmd[0] == "addiw"){
 			insfmt = 'i';
 			opcode = "0011011";
 			func3 = "000";
 			func7 = "";
+			
+		} else if (cmd[0] == "andi"){
+			insfmt = 'r';
+			opcode = "0010011";
+			func3 = "111";
+			func7 = "";
+			
+		} else if (cmd[0] == "ori"){
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "110";
+			func7 = "";
+			
+		} else if (cmd[0] == "xori"){
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "100";
+			func7 = "";
+			
+		} else if (cmd[0] == "slli"){
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "001";
+			func7 = "0000000";
+			
+		} else if (cmd[0] == "srli"){
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "101";
+			func7 = "0000000";
+			
+		} else if (cmd[0] == "srai"){
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "101";
+			func7 = "0100000";
+			
 		} else if (cmd[0] == "slliw"){
 			insfmt = 'i';
 			opcode = "0011011";
 			func3 = "001";
 			func7 = "0000000";
+			
 		} else if (cmd[0] == "srliw"){
 			insfmt = 'i';
 			opcode = "0011011";
 			func3 = "101";
 			func7 = "0000000";
+			
 		} else if (cmd[0] == "sraiw"){
 			insfmt = 'r';
 			opcode = "0011011";
 			func3 = "101";
 			func7 = "0100000";
+			
+		} else if (cmd[0] == "slti"){
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "010";
+			func7 = "";
+			
+		} else if (cmd[0] == "sltiu"){
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "011";
+			func7 = "";
+			
+		} else if (cmd[0] == "sgti"){
+			insfmt = 'i';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sgtiu"){
+			insfmt = 'i';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "slei"){
+			insfmt = 'i';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sleiu"){
+			insfmt = 'i';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sgei"){
+			insfmt = 'i';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
+		} else if (cmd[0] == "sgeiu"){
+			insfmt = 'i';
+			opcode = "";
+			func3 = "";
+			func7 = "";
+			
 		} else if (cmd[0] == "jalr"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1100111";
 			func3 = "000";
 			func7 = "";
+			
 		} else if (cmd[0] == "ecall"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1110011";
 			func3 = "000";
 			func7 = "000000000000";
+			
 		} else if (cmd[0] == "ebreak"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1110011";
 			func3 = "000";
 			func7 = "000000000001";
+			
 		} else if (cmd[0] == "CSRRW"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1110011";
 			func3 = "001";
 			func7 = "";
+			
 		} else if (cmd[0] == "CSRRS"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1110011";
 			func3 = "010";
 			func7 = "";
+			
 		} else if (cmd[0] == "CSRRC"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1110011";
 			func3 = "011";
 			func7 = "";
+			
 		} else if (cmd[0] == "CSRRWT"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1110011";
 			func3 = "101";
 			func7 = "";
+			
 		} else if (cmd[0] == "CSRRST"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1110011";
 			func3 = "110";
 			func7 = "";
+			
 		} else if (cmd[0] == "CSRRCT"){
-			insfmt = 'r';
+			insfmt = 'i';
 			opcode = "1110011";
 			func3 = "111";
 			func7 = "";
+			
 		} else if (cmd[0] == "lui"){
 			insfmt = 'u';
 			opcode = "0110111";
 			func3 = "";
 			func7 = "";
+			
 		} else if (cmd[0] == "auipc"){
 			insfmt = 'u';
 			opcode = "0010111";
 			func3 = "";
 			func7 = "";
+			
 		} else {
 			std::cout << "Cannot identify the type of the instruction\n";
 		}
