@@ -124,6 +124,17 @@ int binstr2dec(string binstr){
 	return num;
 }
 
+int logicalrightshift(int num, int n){
+	// performs logical right shift
+	if (num < 0){
+		num = (num >> 1) + 0x80000000; // operator precedence is important as to first perform right shift and then add 
+		if (n > 1) return num >> (n-1);
+		else return num;
+	} else {
+		return num >> (n-1);
+	}
+}
+
 int* idreg(string reg){
 	// return the address of the register based upon the input string reg
 	if (reg == "00000") {
@@ -196,7 +207,7 @@ int* idreg(string reg){
 }
 
 // instruction supported : 
-// i format : lb, lh, lw, addi, ori, andi, xori, slti, sgti, slei, sgei, jalr
+// i format : lb, lh, lw, addi, ori, andi, xori, slti, sgti, slei, sgei, slli, srli, srai, jalr
 // r format : add, sub, mul, div, rem, and, or, xor, slt, sgt, sle, sge	
 // s format : sb, sh, sw
 // sb format : beq, bne, blt, bgt, ble, bge
@@ -281,6 +292,21 @@ void exec_ext_bin_inst(string* ins){
 	} else if (ins[0] == "sgei"){
 		// the destination register cannot be x0
 		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) >= binstr2dec(ins[4]) ? 1 : 0;
+		PC = PC + 4;
+	
+	} else if (ins[0] == "slli"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) << binstr2dec(ins[4]);
+		PC = PC + 4;
+	
+	} else if (ins[0] == "srai"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) >> binstr2dec(ins[4]);
+		PC = PC + 4;
+	
+	} else if (ins[0] == "srli"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = logicalrightshift(*idreg(ins[2]), binstr2dec(ins[4]));
 		PC = PC + 4;
 	
 	} else if (ins[0] == "jalr"){
@@ -390,5 +416,24 @@ void exec_ext_bin_inst(string* ins){
 		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) >= *idreg(ins[3]) ? 1 : 0;
 		PC = PC + 4;
 		
+	} else if (ins[0] == "sll"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) << *idreg(ins[3]);
+		PC = PC + 4;
+	
+	} else if (ins[0] == "sra"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = *idreg(ins[2]) >> *idreg(ins[3]);
+		PC = PC + 4;
+	
+	} else if (ins[0] == "srl"){
+		// the destination register cannot be x0
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = logicalrightshift(*idreg(ins[2]), *idreg(ins[3]));
+		PC = PC + 4;
+	
 	}
+}
+
+string* ext_bin_inst(string bincmd){
+	
 }
