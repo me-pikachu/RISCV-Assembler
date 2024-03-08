@@ -2,7 +2,7 @@
 #include <cctype>
 #include <string>
 #include <fstream>
-#include "../mini_project/lexical_analyzer.hpp"
+
 using namespace std;
 
 
