@@ -9,9 +9,9 @@ map<string, int> labelPC; // linking all the labels with their corresponding PC
 map<int, string> PCbincmd; // all the binary commands with their corresponding PC
 vector<int> unfinished_cmd; // storing all the unfinished commands
 
-long long str2num(string numstr){
+int decstr2dec(string numstr){
 	// this function converts a string of a number to an integer
-	long long num = 0;
+	int num = 0;
 	for (int i=numstr.length(); i>=0; i--){
 		num = num*10 + (numstr[i]-'0')%10; // numstr[i] - '0' converts the char to digit
 	}
@@ -381,7 +381,7 @@ bool generateBinCmd(){
 		} else if (insfmt == 'i'){
 			if (func7.length() == 7){
 				// we already have 7 bits of immediate
-				long long num = str2num(cmd[4]);
+				long long num = decstr2dec(cmd[4]);
 				if (num < 0){
 					std::cout << "The value of immediate should be between 0 to 31\n";
 				} else {
@@ -402,7 +402,7 @@ bool generateBinCmd(){
 				
 			} else {
 				
-				bool* binimd = Dec2Bin(str2num(cmd[4]), 12); // immediate is of 12 bits
+				bool* binimd = Dec2Bin(decstr2dec(cmd[4]), 12); // immediate is of 12 bits
 			
 				// adding the 12 bits of immediate
 				char digchar;
@@ -416,7 +416,7 @@ bool generateBinCmd(){
 			
 			
 		} else if (insfmt == 's'){
-			bool* binimd = Dec2Bin(str2num(cmd[4]), 12); // immediate is of 12 bits
+			bool* binimd = Dec2Bin(decstr2dec(cmd[4]), 12); // immediate is of 12 bits
 			
 			// imd[11:5]
 			char digchar;
@@ -436,7 +436,7 @@ bool generateBinCmd(){
 			bincmd = bincmd + opcode; // opcode
 			
 		} else if (insfmt == 'u'){
-			bool* binimd = Dec2Bin(str2num(cmd[4]), 20); // immediate is of 20 bits
+			bool* binimd = Dec2Bin(decstr2dec(cmd[4]), 20); // immediate is of 20 bits
 			
 			// imm[31:12] all the lower bits would be 0
 			char digchar;
