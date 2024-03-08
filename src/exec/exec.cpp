@@ -110,6 +110,26 @@ int memory(int address, int size, bool read, int writedata = 0){
 	}
 }
 
+int decstr2dec(string numstr){
+	// this function converts a string of a number to an integer
+	int num = 0;
+	for (int i=numstr.length(); i>=0; i--){
+		num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
+	}
+	
+	return num;
+}
+
+long long decstr2longdec(string numstr){
+	// this function converts a string of a number to an integer
+	long long num = 0;
+	for (int i=numstr.length(); i>=0; i--){
+		num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
+	}
+	
+	return num;
+}
+
 int binstr2dec(string binstr){
 	// this function converts a binary string of a number to an integer
 	int num = 0;
@@ -432,6 +452,34 @@ void exec_ext_bin_inst(string* ins){
 		PC = PC + 4;
 	
 	}
+}
+
+int assembler_dir(string* asscmd){
+	// runs the assembler directives
+	// returns the starting address where data is stored
+	// asscmd = {"command_name", val, ascii_str} // ascii_str is non empty only when .asciiz is used
+	static int address = 0x0FFFFFFC;
+	if (asscmd[0] == "byte"){
+		memory(address, 1, 0, decstr2dec(asscmd[1]));
+		address = address + 1;
+	} else if (asscmd[0] == "half"){
+		memory(address, 2, 0, decstr2dec(asscmd[1]));
+		address = address + 2;
+	} else if (asscmd[0] == "word"){
+		memory(address, 4, 0, decstr2dec(asscmd[1]));
+		address = address + 4;
+	} else if (asscmd[0] == "dword"){
+		memory(address, 8, 0, decstr2longdec(asscmd[1]));
+		address = address + 8;
+	} else if (asscmd[0] == "asciiz"){
+		for (int i=0; i<asscmd[2].length(); i++){
+			memory(address, 1, 0, asscmd[2][i]);
+			address = address + 1;
+		}
+	} else {
+		std::cout << "Invalid assemble directive\n";
+	}
+	return address;
 }
 
 string* ext_bin_inst(string bincmd){
