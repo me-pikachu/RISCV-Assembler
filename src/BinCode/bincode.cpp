@@ -13,13 +13,27 @@ int decstr2dec(string numstr){
 	// this function converts a string of a number to an integer
 	int num = 0;
 	for (int i=numstr.length(); i>=0; i--){
-		num = num*10 + (numstr[i]-'0')%10; // numstr[i] - '0' converts the char to digit
+		num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 	}
+	
 	return num;
 }
 
-bool* Dec2Bin(long long num, size_t size){
+bool* Dec2Bin(int num, size_t size){
 	bool* array = (bool*)malloc(size*sizeof(bool));
+	
+	if (num >= -1*pow(2, size-1) && num <= pow(2, size-1) - 1){
+		if (num < 0){
+			num = pow(2, size) + num;
+		}
+		
+		for (int i=0; i < size; i++){
+			array[i] = num % 2;
+			num = num / 2;
+		}		
+	} else {
+		std::cout << "Out of range immediate error\n"; 
+	}
 	
 	return array;
 }
