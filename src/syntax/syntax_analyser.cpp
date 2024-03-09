@@ -1,12 +1,8 @@
 #include <iostream>
-#include "../lexical/lexical_analyser.hpp"
+#include "../lexical/lexical_analyser.cpp"
 
 using namespace std;
 string s[6];
-string lex(){
-    string c;
-    return c;
-}
 
 //function to convert string to int
 int str2int(string c){
@@ -70,142 +66,142 @@ bool check_register(string c){
 }
 
 //function to check syntax and return the tokens in form of a string array
-string* getcmd(){
-    string c=lex();
+string* getcmd(string file_path){
+    string c=lex(file_path);
     unsigned long length=c.length();
-    while(c=="\n") c=lex();
+    while(c=="\n") c=lex(file_path);
     if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"||c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){
         s[0]=c;
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) {
             s[1]=bin_index(c);
         }
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) s[2]=bin_index(c);
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) s[3]=bin_index(c);
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!="\n") error();
     }
     else if(c=="ori"||c=="addi"||c=="andi"){
         s[0]=c;
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) {
             s[1]=bin_index(c);
         }
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) s[2]=bin_index(c);
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         int n=str2int(c);
         if(n<-2048 || n>2047) error();
         else s[4]=c;
-        c=lex();
+        c=lex(file_path);
         if(c!="\n") error();
     }
     else if(c=="lb"||c=="ld"||c=="lw"||c=="lh"||c=="jalr"){       //checking if it is a load command
         s[0]=c;
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) {
             s[1]=bin_index(c);
         }
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         int n=str2int(c);
         if(n<-2048 || n>2047) error();
         else s[4]=c;
-        c=lex();
+        c=lex(file_path);
         if(c!="(") error();
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) s[2]=bin_index(c);
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=")") error();
-        c=lex();
+        c=lex(file_path);
         if(c!="\n") error();
     }
     else if(c=="sb"||c=="sd"||c=="sw"||c=="sh"){         //checking if it is a store command
         s[0]=c;
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) {
             s[3]=bin_index(c);
         }
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         int n=str2int(c);
         if(n<-2048 || n>2047) error();
         else s[4]=c;
-        c=lex();
+        c=lex(file_path);
         if(c!="(") error();
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) s[2]=bin_index(c);
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=")") error();
-        c=lex();
+        c=lex(file_path);
         if(c!="\n") error();
     }
     else if(c=="beq"||c=="bne"||c=="bge"||c=="blt"){
         s[0]=c;
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) s[2]=bin_index(c);
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) s[3]=bin_index(c);
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         s[5]=c;
-        c=lex();
+        c=lex(file_path);
         if(c!="\n") error();
     }
     else if(c=="lui" || c=="auipc"){
         s[0]=c;
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) {
             s[1]=bin_index(c);
         }
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         int m=str2int(c);
         if(m>1048575 || m<0) error();
         else s[4]=c;
-        c=lex();
+        c=lex(file_path);
         if(c!="\n") error();
     }
     else if(c=="jal"){
         s[0]=c;
-        c=lex();
+        c=lex(file_path);
         if(check_register(c)) {
             s[1]=bin_index(c);
         }
         else error();
-        c=lex();
+        c=lex(file_path);
         if(c!=",") error();
-        c=lex();
+        c=lex(file_path);
         s[5]=c;
-        c=lex();
+        c=lex(file_path);
         if(c!="\n") error();
     }
     else if(c[length-1]==':'){
@@ -223,6 +219,6 @@ string* getcmd(){
 
 
 int main(){
-    getcmd();
+    getcmd("new.asm");
     return 0;
 }
