@@ -2,8 +2,6 @@
 
 using namespace std;
 
-long long PC = 0;
-
 int x0 = 0;
 int x1 = 0;
 int x2 = 2147483612;
@@ -67,6 +65,7 @@ int memorywrite(int address, int val){
 }
 
 int memory(int address, int size, bool read, int writedata = 0){
+	// memory stage
 	// size is 1 for byte, 2 for half word, 4 for word and 8 for double word
 	// double word is not supported!
 	
@@ -135,12 +134,14 @@ int binstr2dec(string binstr){
 	int num = 0;
 	
 	for (int i=binstr.length(); i>=0; i--){
-		if (binstr[i] == '-'){
-			num = -1*num; // the number is negative
-		} else {
-			num = num*2 + (binstr[i]-'0'); // numstr[i] - '0' converts the char to digit
-		}
+		num = num*2 + (binstr[i]-'0'); // numstr[i] - '0' converts the char to digit
 	}
+	
+	if (num > 2147483647){
+		// num > 2^31-1
+		num = num - 4294967296; // num - 2^32
+	}
+	
 	return num;
 }
 
@@ -234,7 +235,10 @@ int* idreg(string reg){
 // u format : auipc, lui
 // uj format : jal
 
-void exec_ext_bin_inst(string* ins){
+int exec_ext_bin_inst(string* ins, int PC){
+	// execute stage + memory stage + write_back stage
+	// returns the new PC
+	
 	if (ins[0] == "sb"){
 		// address is rs1 + immediate
 		// value to store is in rs2
@@ -338,12 +342,12 @@ void exec_ext_bin_inst(string* ins){
 		
 	} else if (ins[0] == "auipc"){
 		// the destination register cannot be x0
-		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = binstr2dec(ins[4]) << 20 + PC; // shift by 20 bits and add current PC
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = binstr2dec(ins[4]) << 12 + PC; // shift by 12 bits and add current PC
 		PC = PC + 4;
 		
 	} else if (ins[0] == "lui"){
 		// the destination register cannot be x0
-		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = binstr2dec(ins[4]) << 20; // shift by 20 bits
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = binstr2dec(ins[4]) << 12; // shift by 12 bits
 		PC = PC + 4;
 		
 	} else if (ins[0] == "jal"){
@@ -452,6 +456,8 @@ void exec_ext_bin_inst(string* ins){
 		PC = PC + 4;
 	
 	}
+	
+	return PC;
 }
 
 int assembler_dir(string* asscmd){
@@ -482,6 +488,269 @@ int assembler_dir(string* asscmd){
 	return address;
 }
 
+// instruction supported : 
+// i format : lb, lh, lw, ld, lbu, lhu, lwu, fence, fence.i, addi, addiw, andi, ori, xori, slli, srli, srai, slliw, srliw, sraiw, slti, sltiu, jalr, ecall, ebreak, CSRRW, CSRRS, CSRRC, CSRRWT, CSRRST, CSRRCT
+// r format : add, addw, sub, subw, mul, div, rem, sll, sllw, srl, srlw, sra, sraw, and, or, xor, slt, sltu	
+// s format : sb, sh, sw, sd
+// sb format : beq, bne, blt, bgt, ble, bge
+// u format : auipc, lui
+// uj format : jal
+
 string* ext_bin_inst(string bincmd){
+	// decode stage
+	
+	string* ins = new string[6];
+	ins[0] = ""; // command_name
+	ins[1] = ""; // rd
+	ins[2] = ""; // rs1
+	ins[3] = ""; // rs2
+	ins[4] = ""; // imm
+	ins[5] = ""; // label_name;
+	
+	string opcode = "";
+	opcode = opcode + bincmd[25] + bincmd[26] + bincmd[27] + bincmd[28] + bincmd[29] + bincmd[30] + bincmd[31];
+	
+	char insfmt = ' '; // b for sb format and j for uj format
+	
+	if (opcode == "0000011"){
+		// lb lh lw ld lbu lhu lwu
+		insfmt = 'i';
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000") ins[0] = "lb";
+		else if (func3 == "001") ins[0] = "lh";
+		else if (func3 == "010") ins[0] = "lw";
+		else if (func3 == "011") ins[0] = "ld";
+		else if (func3 == "100") ins[0] = "lbu";
+		else if (func3 == "101") ins[0] = "lhu";
+		else if (func3 == "110") ins[0] = "lwu";
+		
+	} else if (opcode == "0001111"){
+		// fence fence.i
+		insfmt = 'i';
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000") ins[0] = "fence";
+		else if (func3 == "001") ins[0] = "fence.i";
+		
+	} else if (opcode == "0010011"){
+		// addi andi ori xori slli srli srai slti sltiu
+		insfmt = 'i';
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000") ins[0] = "addi";
+		else if (func3 == "111") ins[0] = "andi";
+		else if (func3 == "110") ins[0] = "ori";
+		else if (func3 == "100") ins[0] = "xori";
+		else if (func3 == "001") ins[0] = "slli";
+		else if (func3 == "101"){
+			if (bincmd[1] == '0'){
+				ins[0] = "srli";
+			} else {
+				ins[0] = "srai";
+			}
+		}
+		else if (func3 == "010") ins[0] = "slti";
+		else if (func3 == "011") ins[0] = "sltiu";
+		
+	} else if (opcode == "0011011"){
+		// addiw slliw srliw sraiw
+		insfmt = 'i';
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000") ins[0] = "addiw";
+		else if (func3 == "001") ins[0] = "slliw";
+		else if (func3 == "101"){
+			if (bincmd[1] == '0'){
+				ins[0] = "srliw";
+			} else {
+				ins[0] = "sraiw";
+			}
+		}
+		
+	} else if (opcode == "1100111"){
+		// jalr
+		insfmt = 'i';
+		ins[0] = "jalr";
+		
+	} else if (opcode == "1110011"){
+		// ecall, ebreak, CSRRW, CSRRS, CSRRC, CSRRWT, CSRRST, CSRRCT
+		insfmt = 'i';
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000"){
+			if (bincmd[11] == '0'){
+				ins[0] = "ecall";
+			} else {
+				ins[0] = "ebreak";
+			}
+		} else if (func3 == "001") ins[0] = "CSRRW";
+		else if (func3 == "010") ins[0] = "CSRRS";
+		else if (func3 == "011") ins[0] = "CSRRC";
+		else if (func3 == "101") ins[0] = "CSRRWT";
+		else if (func3 == "110") ins[0] = "CSRRST";
+		else if (func3 == "111") ins[0] = "CSRRCT";
+		
+	} else if (opcode == "0110011"){
+		// add sub mul div rem sll srl sra and or xor slt sltu
+		insfmt = 'r';
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000"){
+			if (bincmd[1] == '0'){
+				if (bincmd[6] == '0'){
+					ins[0] = "add";
+				} else {
+					ins[0] = "mul";
+				}
+			} else {
+				ins[0] = "sub";
+			}
+		} else if (func3 == "100"){
+			if (bincmd[6] == '0'){
+				ins[0] = "xor";
+			} else {
+				ins[0] = "div"; // integer divide
+			}
+		} else if (func3 == "110"){
+			if (bincmd[6] == '0'){
+				ins[0] = "or";
+			} else {
+				ins[0] = "rem";
+			}
+		} else if (func3 == "001") ins[0] = "sll";
+		  else if (func3 == "101"){
+			if (bincmd[1] == '0'){
+				ins[0] = "srl";
+			} else {
+				ins[0] = "sra";
+			}
+		} else if (func3 == "111") ins[0] = "and";
+		  else if (func3 == "010") ins[0] = "slt";
+		  else if (func3 == "011") ins[0] = "sltu";
+		
+	} else if (opcode == "0111011"){
+		// addw subw sllw srlw sraw
+		insfmt = 'r';
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000"){
+			if (bincmd[1] == '0'){
+				ins[0] = "addw";
+			} else {
+				ins[0] = "subw";
+			}
+		}
+		else if (func3 == "001") ins[0] = "sllw";
+		else if (func3 == "101"){
+			if (bincmd[1] == '0'){
+				ins[0] = "srlw";
+			} else {
+				ins[0] = "sraw";
+			}
+		}
+		
+	} else if (opcode == "0110111"){
+		// lui
+		insfmt = 'u';
+		ins[0] = "lui";
+		
+	} else if (opcode == "0010111"){
+		// auipc
+		insfmt = 'u';
+		ins[0] = "auipc";
+		
+	} else if (opcode == "0100011"){
+		// sb sh sw sd
+		insfmt = 's';
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000") ins[0] = "sb";
+		else if (func3 == "001") ins[0] = "sh";
+		else if (func3 == "010") ins[0] = "sw";
+		else if (func3 == "011") ins[0] = "sd";
+		
+	} else if (opcode == "1101111"){
+		// jal
+		insfmt = 'j'; // uj format
+		ins[0] = "jal";
+		
+	} else if (opcode == "1100011"){
+		// beq bne blt bge bltu bgeu
+		insfmt = 'b'; // sb format
+		string func3 = "";
+		func3 = func3 + bincmd[17] + bincmd[18] + bincmd[19]; // func3
+		
+		if (func3 == "000") ins[0] = "beq";
+		else if (func3 == "001") ins[0] = "bne";
+		else if (func3 == "100") ins[0] = "blt";
+		else if (func3 == "101") ins[0] = "bge";
+		else if (func3 == "110") ins[0] = "bltu";
+		else if (func3 == "111") ins[0] = "bgeu";
+		
+	} else {
+		std::cout << "Invalid binary operation\n";
+	}
+	
+	if (insfmt == 'r'){
+		ins[3] = ins[3] + bincmd[7] + bincmd[8] + bincmd[9] + bincmd[10] + bincmd[11]; // rs2
+		ins[2] = ins[2] + bincmd[12] + bincmd[13] + bincmd[14] + bincmd[15] + bincmd[16]; // rs1
+		ins[1] = ins[1] + bincmd[20] + bincmd[21] + bincmd[22] + bincmd[23] + bincmd[24]; // rd
+		
+	} else if (insfmt == 'i'){
+		ins[4] = ins[4] + bincmd[0] + bincmd[1] + bincmd[2] + bincmd[3] + bincmd[4] + bincmd[5] + bincmd[6] + bincmd[7] + bincmd[8] + bincmd[9] + bincmd[10] + bincmd[11]; // immediate
+		ins[2] = ins[2] + bincmd[12] + bincmd[13] + bincmd[14] + bincmd[15] + bincmd[16]; // rs1
+		ins[1] = ins[1] + bincmd[20] + bincmd[21] + bincmd[22] + bincmd[23] + bincmd[24]; // rd
+		
+	} else if (insfmt == 's'){
+		ins[4] = ins[4] + bincmd[0] + bincmd[1] + bincmd[2] + bincmd[3] + bincmd[4] + bincmd[5] + bincmd[6] + bincmd[20] + bincmd[21] + bincmd[22] + bincmd[23] + bincmd[24]; // immediate
+		ins[3] = ins[3] + bincmd[7] + bincmd[8] + bincmd[9] + bincmd[10] + bincmd[11]; // rs2
+		ins[2] = ins[2] + bincmd[12] + bincmd[13] + bincmd[14] + bincmd[15] + bincmd[16]; // rs1
+		
+	} else if (insfmt == 'u'){
+		ins[4] = ins[4] + bincmd[0] + bincmd[1] + bincmd[2] + bincmd[3] + bincmd[4] + bincmd[5] + bincmd[6] + bincmd[7] + bincmd[8] + bincmd[9] + bincmd[10] + bincmd[11] + bincmd[12] + bincmd[13] + bincmd[14] + bincmd[15] + bincmd[16] + bincmd[17] + bincmd[18] + bincmd[19]; // immediate
+		ins[1] = ins[1] + bincmd[20] + bincmd[21] + bincmd[22] + bincmd[23] + bincmd[24]; // rd
+		
+	} else if (insfmt == 'b'){
+		// sb format
+		ins[4] = ins[4] + bincmd[0] + bincmd[24] + bincmd[1] + bincmd[2] + bincmd[3] + bincmd[4] + bincmd[5] + bincmd[6] + bincmd[20] + bincmd[21] + bincmd[22] + bincmd[23] + '0'; // immediate ( + '0' as the 0th bit is always considered to be 0)
+		ins[3] = ins[3] + bincmd[7] + bincmd[8] + bincmd[9] + bincmd[10] + bincmd[11]; // rs2
+		ins[2] = ins[2] + bincmd[12] + bincmd[13] + bincmd[14] + bincmd[15] + bincmd[16]; // rs1
+		
+	} else if (insfmt == 'j'){
+		// uj format
+		ins[4] = ins[4] + bincmd[0] + bincmd[12] + bincmd[13] + bincmd[14] + bincmd[15] + bincmd[16] + bincmd[17] + bincmd[18] + bincmd[19] + bincmd[11] + bincmd[1] + bincmd[2] + bincmd[3] + bincmd[4] + bincmd[5] + bincmd[6] + bincmd[7] + bincmd[8] + bincmd[9] + bincmd[10] + '0'; // immediate ( + '0' as the 0th bit is always considered to be 0)
+		ins[1] = ins[1] + bincmd[20] + bincmd[21] + bincmd[22] + bincmd[23] + bincmd[24]; // rd
+	}
+	
+	return ins;
+}
+
+void exec(map<int, string> PCbincmd){
+	// this command execute the code stored in PCbincmd
+	static int PC = 0;
+	auto it = PCbincmd.begin();
+	it = it + PC / 4; // 
+	string* ins = ext_bin_inst(it->second);
+	if (ins[0] == ""){
+		// empty no command
+		return;
+	} else{
+		PC = exec_ext_bin_inst(ins, PC);
+		exec(PCbincmd);
+	}
+}
+
+void print(){
+	std::cout << "x0 : " << x0 << "\nx1 : " << x1 << "\nx2 : " << x2 << "\nx3 : " << x3 << "\nx4 : " << x4 << "\nx5 : " << x5 << "\nx6 : " << x6 << "\nx7 : " << x7 << "\nx8 : " << x8 << "\nx9 : " << x9 << "\nx10 : " << x10 << "\nx11 : " << x11 << "\nx12 : " << x12 << "\nx13 : " << x13 << "\nx14 : " << x14 << "\nx15 : " << x15 << "\nx16 : " << x16 << "\nx17 : " << x17 << "\nx18 : " << x18 << "\nx19 : " << x19 << "\nx20 : " << x20 << "\nx21 : " << x21 << "\nx22 : " << x22 << "\nx23 : " << x23 << "\nx24 : " << x24 << "\nx25 : " << x25 << "\nx26 : " << x26 << "\nx27 : " << x27 << "\nx28 : " << x28 << "\nx29 : " << x29 << "\nx30 : " << x30 << "\nx31 : " << x31;
 	
 }
+

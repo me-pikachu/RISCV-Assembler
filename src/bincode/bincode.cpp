@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "../syntax/syntax_analyser.hpp"
+#include "../syntax/syntax_analyser.cpp"
 
 using namespace std;
 
@@ -12,10 +12,17 @@ vector<int> unfinished_cmd; // storing all the unfinished commands
 int decstr2dec(string numstr){
 	// this function converts a string of a number to an integer
 	int num = 0;
-	for (int i=numstr.length(); i>=0; i--){
-		num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
-	}
-	
+	if (numstr[0] == '-'){
+		// the number is negative
+		for (int i=numstr.length(); i>=1; i--){
+			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
+		}
+		num = -1*num;
+	} else {
+		for (int i=numstr.length(); i>=0; i--){
+			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
+		}
+	}	
 	return num;
 }
 
@@ -150,8 +157,8 @@ bool generateBinCmd(){
 		bool insfmt;
 		
 		// instruction supported : 
-		// i format : lb, lh, lw, ld, lbu, lhu, lwu, fence, fence.i, addi, addiw, andi, ori, xori, slli, srli, srai, slliw, srliw, sraiw, slti, sltiu, sgti, sgtiu, slei, sleiu, sgei, sgeiu, jalr
-		// r format : add, sub, mul, div, rem, sll, srl, sra, and, or, xor, slt, sltu, sgt, sgtu, sle, sleu, sge, sgeu	
+		// i format : lb, lh, lw, ld, lbu, lhu, lwu, fence, fence.i, addi, addiw, andi, ori, xori, slli, srli, srai, slliw, srliw, sraiw, slti, sltiu, sgti, sgtiu, slei, sleiu, sgei, sgeiu, jalr, ecall, ebreak, CSRRW, CSRRS, CSRRC, CSRRWT, CSRRST, CSRRCT
+		// r format : add, addw, sub, subw, mul, div, rem, sll, sllw, srl, srlw, sra, sraw, and, or, xor, slt, sltu, sgt, sgtu, sle, sleu, sge, sgeu	
 		// s format : sb, sh, sw, sd
 		// sb format : beq, bne, blt, bgt, ble, bge (above)
 		// u format : auipc, lui
@@ -163,33 +170,51 @@ bool generateBinCmd(){
 			func3 = "000";
 			func7 = "0000000";
 			
+		} else if (cmd[0] == "addw"){
+			insfmt = 'r';
+			opcode = "0111011";
+			func3 = "000";
+			func7 = "0000000";
+			
 		} else if (cmd[0] == "sub"){
 			insfmt = 'r';
 			opcode = "0110011";
 			func3 = "000";
 			func7 = "0100000";
 			
+		} else if (cmd[0] == "subw"){
+			insfmt = 'r';
+			opcode = "0111011";
+			func3 = "000";
+			func7 = "0100000";
+			
 		} else if (cmd[0] == "mul"){
 			insfmt = 'r';
-			opcode = "";
-			func3 = "";
-			func7 = "";
+			opcode = "0110011";
+			func3 = "000";
+			func7 = "0000001";
 			
 		} else if (cmd[0] == "div"){
 			insfmt = 'r';
-			opcode = "";
-			func3 = "";
-			func7 = "";
+			opcode = "0110011";
+			func3 = "100";
+			func7 = "0000001";
 			
 		} else if (cmd[0] == "rem"){
 			insfmt = 'r';
-			opcode = "";
-			func3 = "";
-			func7 = "";
+			opcode = "0110011";
+			func3 = "110";
+			func7 = "0000001";
 			
 		} else if (cmd[0] == "sll"){
 			insfmt = 'r';
 			opcode = "0110011";
+			func3 = "001";
+			func7 = "0000000";
+			
+		} else if (cmd[0] == "sllw"){
+			insfmt = 'r';
+			opcode = "0111011";
 			func3 = "001";
 			func7 = "0000000";
 			
@@ -198,13 +223,26 @@ bool generateBinCmd(){
 			opcode = "0110011";
 			func3 = "101";
 			func7 = "0000000";
+			
+		} else if (cmd[0] == "srlw"){
+			insfmt = 'r';
+			opcode = "0111011";
+			func3 = "101";
+			func7 = "0000000";
+			
 		} else if (cmd[0] == "sra"){
 			insfmt = 'r';
 			opcode = "0110011";
 			func3 = "101";
 			func7 = "0100000";
 			
-		 else if (cmd[0] == "and"){
+		} else if (cmd[0] == "sraw"){
+			insfmt = 'r';
+			opcode = "0111011";
+			func3 = "101";
+			func7 = "0100000";
+			
+		} else if (cmd[0] == "and"){
 			insfmt = 'r';
 			opcode = "0110011";
 			func3 = "111";

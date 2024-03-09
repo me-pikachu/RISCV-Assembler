@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
-#include "bincode/bincode.hpp"
-#include "exec/exec.hpp"
+#include "bincode/bincode.cpp"
+#include "exec/exec.cpp"
 
 using namespace std;
 
