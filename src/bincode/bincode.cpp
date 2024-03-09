@@ -3,7 +3,7 @@
 
 using namespace std;
 
-long long PC = 0; // setting the Program Counter initially to 0
+int curPC = 0; // setting the Program Counter initially to 0
 
 map<string, int> labelPC; // linking all the labels with their corresponding PC
 map<int, string> PCbincmd; // all the binary commands with their corresponding PC
@@ -14,12 +14,12 @@ int decstr2dec(string numstr){
 	int num = 0;
 	if (numstr[0] == '-'){
 		// the number is negative
-		for (int i=numstr.length(); i>=1; i--){
+		for (int i=numstr.length()-1; i>=1; i--){
 			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 		}
 		num = -1*num;
 	} else {
-		for (int i=numstr.length(); i>=0; i--){
+		for (int i=numstr.length()-1; i>=0; i--){
 			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 		}
 	}	
@@ -45,11 +45,10 @@ bool* Dec2Bin(int num, size_t size){
 	return array;
 }
 
-bool generateBinCmd(){
-	string* cmd = getcmd();
+bool generateBinCmd(string file_path){
+	string* cmd = getcmd(file_path);
 	// cmd = {"command_name","rd","rs1","rs2","immediate","label_name"}
 	string bincmd = "";
-	
 	if (cmd[0] == "" && cmd[1] == "" && cmd[2] == "" && cmd[3] == "" && cmd[4] == "" && cmd[5] == "") return 0; // to stop iterating the function
 	
 	if (cmd[5] != "" && cmd[0] != "labelread"){
@@ -66,7 +65,7 @@ bool generateBinCmd(){
 		
 		if (PCoflabel >= 0){
 			// we found the PC for the label
-			long long offset = PCoflabel - PC;
+			long long offset = PCoflabel - curPC;
 			if (cmd[0] == "jal"){
 				char digchar;
 				bool* binOffset = Dec2Bin(offset, 21); // jal has a 21 bit offset field
@@ -134,27 +133,27 @@ bool generateBinCmd(){
 				bincmd = bincmd + "1100011";
 			}
 			
-			PCbincmd.insert(pair<int, string>(PC, bincmd));
-			PC = PC + 4;
+			PCbincmd.insert(pair<int, string>(curPC, bincmd));
+			curPC = curPC + 4;
 			
 		} else {
 			// add the current command to unfinished commands
-			unfinished_cmd.push_back(PC);
+			unfinished_cmd.push_back(curPC);
 			string uf_cmd = cmd[0] + "," + cmd[1] + "," + cmd[2] + "," + cmd[3] + "," + cmd[4] + "," + cmd[5];
-			PCbincmd.insert(pair<int, string>(PC, uf_cmd)); // uf_cmd is of the format all the cmd fields combined with ',' as delimiter
-			
+			PCbincmd.insert(pair<int, string>(curPC, uf_cmd)); // uf_cmd is of the format all the cmd fields combined with ',' as delimiter
+			curPC = curPC + 4;
 		}
 		return 1; // 1 means to keep on iterating the generateBinCmd
 		
 	} else if (cmd[5] != "" && cmd[0] == "labelread"){
-		labelPC.insert(pair<string, int>(cmd[5], PC));
+		labelPC.insert(pair<string, int>(cmd[5], curPC));
 		return 1; // 1 means to keep on iterating the generateBinCmd
 		
 	} else {
 		string func7;
 		string func3;
 		string opcode;
-		bool insfmt;
+		char insfmt = ' ';
 		
 		// instruction supported : 
 		// i format : lb, lh, lw, ld, lbu, lhu, lwu, fence, fence.i, addi, addiw, andi, ori, xori, slli, srli, srai, slliw, srliw, sraiw, slti, sltiu, sgti, sgtiu, slei, sleiu, sgei, sgeiu, jalr, ecall, ebreak, CSRRW, CSRRS, CSRRC, CSRRWT, CSRRST, CSRRCT
@@ -260,7 +259,7 @@ bool generateBinCmd(){
 			func3 = "100";
 			func7 = "0000000";
 			
-		} } else if (cmd[0] == "slt"){
+		} else if (cmd[0] == "slt"){
 			insfmt = 'r';
 			opcode = "0110011";
 			func3 = "010";
@@ -597,7 +596,6 @@ bool generateBinCmd(){
 				bincmd = func7 + bincmd + cmd[2] + func3 + cmd[1] + opcode; // imm[11:0] rs1 func3 rd opcode
 				
 			} else {
-				
 				bool* binimd = Dec2Bin(decstr2dec(cmd[4]), 12); // immediate is of 12 bits
 			
 				// adding the 12 bits of immediate
@@ -648,8 +646,8 @@ bool generateBinCmd(){
 			std::cout << "Cannot identify the type of the instruction\n";
 		}
 		
-		PCbincmd.insert(pair<int, string>(PC, bincmd));
-		PC = PC + 4;
+		PCbincmd.insert(pair<int, string>(curPC, bincmd));
+		curPC = curPC + 4;
 		return 1;
 	}
 }
@@ -660,11 +658,10 @@ void update_unfinished_cmd(){
 	for (int i : unfinished_cmd){
 		string cmd;
 		string bincmd = "";
-		for (auto it = PCbincmd.begin(); it != PCbincmd.end(); ++it){
-			if (it->first == i){
-				cmd = it->second;
-			}
-		}
+		auto it = PCbincmd.begin();
+		int t = i/4;
+		while(t--) it++; // finding the right iterator
+		cmd = it->second;
 		
 		string cmd_name = "";
 		int j = 0;
@@ -672,7 +669,7 @@ void update_unfinished_cmd(){
 			if (cmd[j] == ',') break;
 			cmd_name = cmd_name + cmd[j];
 		}
-		
+
 		string rd = "";
 		for (j=j+1; j<cmd.length(); j++){
 			if (cmd[j] == ',') break;
@@ -710,8 +707,6 @@ void update_unfinished_cmd(){
 				break;
 			}
 		}
-		
-		
 		
 		
 		// now cmd_name is having the command_name
@@ -760,7 +755,7 @@ void update_unfinished_cmd(){
 			bincmd = bincmd + rs2 + rs1;
 			
 			// func3
-			if (cmd_name == "beq") bincmd = bincmd + "000";
+			if (cmd_name == "beq")bincmd = bincmd + "000";
 			else if (cmd_name == "bne") bincmd = bincmd + "001";
 			else if (cmd_name == "blt") bincmd = bincmd + "100";
 			else if (cmd_name == "bge") bincmd = bincmd + "101";
@@ -783,11 +778,22 @@ void update_unfinished_cmd(){
 			
 			bincmd = bincmd + "1100011";
 		}
+		it->second = bincmd; // update the PCbincmd
 	}
 }
 
-void getBinCmd(){
-	while(generateBinCmd()){}
+void getBinCmd(string file_path){
+	for (int i=0; i<6; i++){
+		generateBinCmd(file_path);
+	}
+	//while(generateBinCmd(file_path)){}
 	update_unfinished_cmd();
+}
+
+int main(){
+	getBinCmd("new.asm");
+	for (auto it = PCbincmd.begin(); it != PCbincmd.end(); it++){
+		cout << it->first << " " << it->second << endl;
+	}
 }
 

@@ -303,8 +303,8 @@ string* getcmd(string file_path){
         if(c!="\n") error();
     }
     else if(c[len-1]==':'){
-        cout <<"xy";
         string c1;
+		s[0] = "labelread";
         for (unsigned long i=0; i<len-1;i++) {
             c1=c1+c[i];
         }
@@ -316,7 +316,7 @@ string* getcmd(string file_path){
 }
 
 
-
+/*
 int main(){
     getcmd("new.asm");
     cout <<s[0]<<" "<<s[1]<<" "<<s[2]<<" "<<s[3]<<" "<<s[4]<<" "<<s[5];
@@ -330,3 +330,4 @@ int main(){
     cout <<s[0]<<" "<<s[1]<<" "<<s[2]<<" "<<s[3]<<" "<<s[4]<<" "<<s[5];
     return 0;
 }
+*/
