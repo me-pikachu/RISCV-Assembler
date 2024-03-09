@@ -9,7 +9,7 @@ using namespace std;
 int column = 0;  // character that the lex is currently analyzing
 int word_count = -1;  // token that the lex is on
 int row = 0;  // row that the lex is currrently on
-bool eof{false};
+bool eof=false;
 
 string lex(string file_path){
     word_count++;
@@ -19,19 +19,19 @@ string lex(string file_path){
     }
 
     ifstream MyFile(file_path);
-    string s{""};
+    string s="";
     for(int i = 0; i<=row; i++){
         getline(MyFile, s);
     }
 
-    string token{""};
+    string token="";
     while(1){
         while(s[column] == ' '){
             column++;
         }
         
         if(s[column] == '\0'){
-            token += "\\n";
+            token += "\n";
             column = 0;
             row++;
             eof = true;
