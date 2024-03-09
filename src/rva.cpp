@@ -57,8 +57,9 @@ string bin2hex(string bin){
 
 void write(string filename){
 	string file_path = filename + ".mc";
+	ofstream MyFile(file_path);
 	for (auto it = PCbincmd.begin(); it != PCbincmd.end(); it++){
-		int2hex(it->first) + " " + bin2hex(it->second) + "\n";
+		MyFile<<int2hex(it->first) + " " + bin2hex(it->second) + "\n";
 	}
 }
 
