@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <fstream>
 #include "bincode/bincode.cpp"
 #include "exec/exec.cpp"
 
@@ -61,6 +62,7 @@ void write(string filename){
 	for (auto it = PCbincmd.begin(); it != PCbincmd.end(); it++){
 		MyFile<<int2hex(it->first) + " " + bin2hex(it->second) + "\n";
 	}
+	MyFile.close();
 }
 
 int main(int argc, char* argv[]) {
