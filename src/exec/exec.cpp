@@ -2,43 +2,96 @@
 
 using namespace std;
 
-int x0 = 0;
-int x1 = 0;
-int x2 = 2147483612;
-int x3 = 268435456;
-int x4 = 0;
-int x5 = 0;
-int x6 = 1;
-int x7 = 0;
-int x8 = 0;
-int x9 = 0;
-int x10 = 1;
-int x11 = 2147483612;
-int x12 = 0;
-int x13 = 0;
-int x14 = 0;
-int x15 = 0;
-int x16 = 0;
-int x17 = 0;
-int x18 = 0;
-int x19 = 0;
-int x20 = 0;
-int x21 = 0;
-int x22 = 0;
-int x23 = 0;
-int x24 = 0;
-int x25 = 0;
-int x26 = 0;
-int x27 = 0;
-int x28 = 0;
-int x29 = 0;
-int x30 = 0;
-int x31 = 0;
+static int x0 = 0;
+static int x1 = 0;
+static int x2 = 2147483616;
+static int x3 = 268435456;
+static int x4 = 0;
+static int x5 = 0;
+static int x6 = 1;
+static int x7 = 0;
+static int x8 = 0;
+static int x9 = 0;
+static int x10 = 1;
+static int x11 = 2147483616;
+static int x12 = 0;
+static int x13 = 0;
+static int x14 = 0;
+static int x15 = 0;
+static int x16 = 0;
+static int x17 = 0;
+static int x18 = 0;
+static int x19 = 0;
+static int x20 = 0;
+static int x21 = 0;
+static int x22 = 0;
+static int x23 = 0;
+static int x24 = 0;
+static int x25 = 0;
+static int x26 = 0;
+static int x27 = 0;
+static int x28 = 0;
+static int x29 = 0;
+static int x30 = 0;
+static int x31 = 0;
 
-map<int, int> mod_mem; // all the memory having some non zero values
+static map<unsigned int, int> mod_mem; // all the memory having some non zero values
 // modified_memory
 
-std::map<int, int>::iterator bin_search_add(int address){
+string int2hex_8byte(int num){
+	string hex = "";
+	
+	for (int i=0; i<8; i++){
+		if (num % 16 == 0) hex += '0';
+		else if (num % 16 == 1) hex += '1';
+		else if (num % 16 == 2) hex += '2';
+		else if (num % 16 == 3) hex += '3';
+		else if (num % 16 == 4) hex += '4';
+		else if (num % 16 == 5) hex += '5';
+		else if (num % 16 == 6) hex += '6';
+		else if (num % 16 == 7) hex += '7';
+		else if (num % 16 == 8) hex += '8';
+		else if (num % 16 == 9) hex += '9';
+		else if (num % 16 == 10) hex += 'A';
+		else if (num % 16 == 11) hex += 'B';
+		else if (num % 16 == 12) hex += 'C';
+		else if (num % 16 == 13) hex += 'D';
+		else if (num % 16 == 14) hex += 'E';
+		else if (num % 16 == 15) hex += 'F';		
+		num = num / 16;
+	}
+	reverse(hex.begin(), hex.end());
+	return hex;
+}
+
+string int2hex_2byte(int num){
+	string hex = "";
+	
+	for (int i=0; i<2; i++){
+		if (num % 16 == 0) hex += '0';
+		else if (num % 16 == 1) hex += '1';
+		else if (num % 16 == 2) hex += '2';
+		else if (num % 16 == 3) hex += '3';
+		else if (num % 16 == 4) hex += '4';
+		else if (num % 16 == 5) hex += '5';
+		else if (num % 16 == 6) hex += '6';
+		else if (num % 16 == 7) hex += '7';
+		else if (num % 16 == 8) hex += '8';
+		else if (num % 16 == 9) hex += '9';
+		else if (num % 16 == 10) hex += 'A';
+		else if (num % 16 == 11) hex += 'B';
+		else if (num % 16 == 12) hex += 'C';
+		else if (num % 16 == 13) hex += 'D';
+		else if (num % 16 == 14) hex += 'E';
+		else if (num % 16 == 15) hex += 'F';		
+		num = num / 16;
+	}
+	reverse(hex.begin(), hex.end());
+	return hex;
+}
+
+std::map<unsigned int, int>::iterator bin_search_add(int address){
+	// performs a search in the map for the address and return the corresponding iterator
 	auto it = mod_mem.lower_bound(address);
     if (it != mod_mem.end() && it->first == address) {
         return it;
@@ -47,6 +100,7 @@ std::map<int, int>::iterator bin_search_add(int address){
 }
 
 void bin_insert_add(int address, int val){
+	// insert a value into the memory
 	auto it = bin_search_add(address);
     if (it == mod_mem.end()) {
         mod_mem.insert(std::make_pair(address, val));
@@ -118,7 +172,7 @@ int memory(int address, int size, bool read, int writedata = 0){
 	}
 }
 
-int decstr2dec(string numstr){
+int decstr2num(string numstr){
 	// this function converts a string of a number to an integer
 	int num = 0;
 	for (int i=numstr.length(); i>=0; i--){
@@ -141,14 +195,12 @@ long long decstr2longdec(string numstr){
 int binstr2dec(string binstr){
 	// this function converts a binary string of a number to an integer
 	int num = 0;
-	
-	for (int i=binstr.length(); i>=0; i--){
+	for (int i=0; i < binstr.length(); i++){
 		num = num*2 + (binstr[i]-'0'); // numstr[i] - '0' converts the char to digit
 	}
-	
-	if (num > 2147483647){
+	if (num > pow(2, binstr.length()-1) - 1){
 		// num > 2^31-1
-		num = num - 4294967296; // num - 2^32
+		num = num - pow(2, binstr.length()); // num - 2^32
 	}
 	
 	return num;
@@ -268,6 +320,13 @@ int exec_ext_bin_inst(string* ins, int PC){
 		int address = *idreg(ins[2]) + binstr2dec(ins[4]);
 		memory(address, 4, false, *idreg(ins[3]));
 		PC = PC + 4;
+	} else if (ins[0] == "sd"){
+		// address is rs1 + immediate
+		// value to store is in rs2
+		std::cout << "sd command is not supported yet. Proceding with the corresponding sw instruction\n";
+		int address = *idreg(ins[2]) + binstr2dec(ins[4]);
+		memory(address, 4, false, *idreg(ins[3]));
+		PC = PC + 4;
 		
 	} else if (ins[0] == "lb"){
 		// address is rs1 + immediate
@@ -283,6 +342,13 @@ int exec_ext_bin_inst(string* ins, int PC){
 		
 	} else if (ins[0] == "lw"){
 		// address is rs1 + immediate
+		int address = *idreg(ins[2]) + binstr2dec(ins[4]); // ins[2] is rs1 and ins[4] is imm
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = memory(address, 4, true); // ins[1] is rd
+		PC = PC + 4;
+		
+	} else if (ins[0] == "ld"){
+		// address is rs1 + immediate
+		std::cout << "ld command is not supported in 32bit RISCV. Proceding with the corresponding lw instruction\n";
 		int address = *idreg(ins[2]) + binstr2dec(ins[4]); // ins[2] is rs1 and ins[4] is imm
 		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = memory(address, 4, true); // ins[1] is rd
 		PC = PC + 4;
@@ -473,15 +539,15 @@ int assembler_dir(string* asscmd){
 	// runs the assembler directives
 	// returns the starting address where data is stored
 	// asscmd = {"command_name", val, ascii_str} // ascii_str is non empty only when .asciiz is used
-	static int address = 0x0FFFFFFC;
+	static int address = 0x10000000;
 	if (asscmd[0] == "byte"){
-		memory(address, 1, 0, decstr2dec(asscmd[1]));
+		memory(address, 1, 0, decstr2num(asscmd[1]));
 		address = address + 1;
 	} else if (asscmd[0] == "half"){
-		memory(address, 2, 0, decstr2dec(asscmd[1]));
+		memory(address, 2, 0, decstr2num(asscmd[1]));
 		address = address + 2;
 	} else if (asscmd[0] == "word"){
-		memory(address, 4, 0, decstr2dec(asscmd[1]));
+		memory(address, 4, 0, decstr2num(asscmd[1]));
 		address = address + 4;
 	} else if (asscmd[0] == "dword"){
 		memory(address, 8, 0, decstr2longdec(asscmd[1]));
@@ -516,11 +582,15 @@ string* ext_bin_inst(string bincmd){
 	ins[4] = ""; // imm
 	ins[5] = ""; // label_name;
 	
+	if (bincmd == "11111111111111111111111111111111"){
+		// exit command
+		return ins;
+	}
+	
 	string opcode = "";
 	opcode = opcode + bincmd[25] + bincmd[26] + bincmd[27] + bincmd[28] + bincmd[29] + bincmd[30] + bincmd[31];
 	
 	char insfmt = ' '; // b for sb format and j for uj format
-	
 	if (opcode == "0000011"){
 		// lb lh lw ld lbu lhu lwu
 		insfmt = 'i';
@@ -747,8 +817,18 @@ void exec(map<int, string> PCbincmd){
 	// this command execute the code stored in PCbincmd
 	static int PC = 0;
 	auto it = PCbincmd.begin();
-	it = it + PC / 4; // 
+	
+	if (PC > (PCbincmd.size()-1)*4 || PC < 0){
+		// if PC is negative then break or if PC increase the map size PC counter then break (the binary code does not have exit code)
+		if (PC < 0) std::cout << "Warning! The PC reached a -ve value\n";
+		return;
+	}
+	
+	int t = PC/4;
+	while (t--) it++;
+	
 	string* ins = ext_bin_inst(it->second);
+	
 	if (ins[0] == ""){
 		// empty no command
 		return;
@@ -758,8 +838,30 @@ void exec(map<int, string> PCbincmd){
 	}
 }
 
-void print(){
-	std::cout << "x0 : " << x0 << "\nx1 : " << x1 << "\nx2 : " << x2 << "\nx3 : " << x3 << "\nx4 : " << x4 << "\nx5 : " << x5 << "\nx6 : " << x6 << "\nx7 : " << x7 << "\nx8 : " << x8 << "\nx9 : " << x9 << "\nx10 : " << x10 << "\nx11 : " << x11 << "\nx12 : " << x12 << "\nx13 : " << x13 << "\nx14 : " << x14 << "\nx15 : " << x15 << "\nx16 : " << x16 << "\nx17 : " << x17 << "\nx18 : " << x18 << "\nx19 : " << x19 << "\nx20 : " << x20 << "\nx21 : " << x21 << "\nx22 : " << x22 << "\nx23 : " << x23 << "\nx24 : " << x24 << "\nx25 : " << x25 << "\nx26 : " << x26 << "\nx27 : " << x27 << "\nx28 : " << x28 << "\nx29 : " << x29 << "\nx30 : " << x30 << "\nx31 : " << x31;
-	
+void dis_mem(){
+	std::cout << "x0 : 0x" << int2hex_8byte(x0) << "\nx1 : 0x" << int2hex_8byte(x1) << "\nx2 : 0x" << int2hex_8byte(x2) << "\nx3 : 0x" << int2hex_8byte(x3) << "\nx4 : 0x" << int2hex_8byte(x4) << "\nx5 : 0x" << int2hex_8byte(x5) << "\nx6 : 0x" << int2hex_8byte(x6) << "\nx7 : 0x" << int2hex_8byte(x7) << "\nx8 : 0x" << int2hex_8byte(x8) << "\nx9 : 0x" << int2hex_8byte(x9) << "\nx10 : 0x" << int2hex_8byte(x10) << "\nx11 : 0x" << int2hex_8byte(x11) << "\nx12 : 0x" << int2hex_8byte(x12) << "\nx13 : 0x" << int2hex_8byte(x13) << "\nx14 : 0x" << int2hex_8byte(x14) << "\nx15 : 0x" << int2hex_8byte(x15) << "\nx16 : 0x" << int2hex_8byte(x16) << "\nx17 : 0x" << int2hex_8byte(x17) << "\nx18 : 0x" << int2hex_8byte(x18) << "\nx19 : 0x" << int2hex_8byte(x19) << "\nx20 : 0x" << int2hex_8byte(x20) << "\nx21 : 0x" << int2hex_8byte(x21) << "\nx22 : 0x" << int2hex_8byte(x22) << "\nx23 : 0x" << int2hex_8byte(x23) << "\nx24 : 0x" << int2hex_8byte(x24) << "\nx25 : 0x" << int2hex_8byte(x25) << "\nx26 : 0x" << int2hex_8byte(x26) << "\nx27 : 0x" << int2hex_8byte(x27) << "\nx28 : 0x" << int2hex_8byte(x28) << "\nx29 : 0x" << int2hex_8byte(x29) << "\nx30 : 0x" << int2hex_8byte(x30) << "\nx31 : 0x" << int2hex_8byte(x31);
+	if (mod_mem.size() != 0) std::cout << "\n           +3 +2 +1 +0" << endl;
+	int prev_add = -8; // used to print " .\n .\n .\n"
+	int address;
+	for (auto rev_it = mod_mem.rbegin(); rev_it != mod_mem.rend(); ++rev_it) {
+		if (rev_it->first % 4 == 0){
+			address = rev_it->first;
+		} else if ((rev_it->first-1) % 4 == 0){
+			address = rev_it->first - 1;
+		} else if ((rev_it->first-2) % 4 == 0){
+			address = rev_it->first - 2;
+		} else if ((rev_it->first-3) % 4 == 0){
+			address = rev_it->first - 3;
+		} else {
+			std::cout << "Warning! Memory display error\n";
+			address = rev_it->first;
+		}
+		
+		if (prev_add == address) continue;
+		if (prev_add != -8 && (prev_add - address) != 4) std::cout << " .\n .\n .\n";
+		prev_add = address;
+		
+		cout << "0x" << int2hex_8byte(address) << " " << int2hex_2byte(memoryread(address + 3)) << " " << int2hex_2byte(memoryread(address + 2)) << " " << int2hex_2byte(memoryread(address + 1)) << " " << int2hex_2byte(memoryread(address)) << endl;
+	}
 }
 
