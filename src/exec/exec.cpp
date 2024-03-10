@@ -39,6 +39,7 @@ map<int, int> mod_mem; // all the memory having some non zero values
 // modified_memory
 
 std::map<int, int>::iterator bin_search_add(int address){
+	// performs a search in the map for the address and return the corresponding iterator
 	auto it = mod_mem.lower_bound(address);
     if (it != mod_mem.end() && it->first == address) {
         return it;
@@ -47,6 +48,7 @@ std::map<int, int>::iterator bin_search_add(int address){
 }
 
 void bin_insert_add(int address, int val){
+	// insert a value into the memory
 	auto it = bin_search_add(address);
     if (it == mod_mem.end()) {
         mod_mem.insert(std::make_pair(address, val));
@@ -473,7 +475,7 @@ int assembler_dir(string* asscmd){
 	// runs the assembler directives
 	// returns the starting address where data is stored
 	// asscmd = {"command_name", val, ascii_str} // ascii_str is non empty only when .asciiz is used
-	static int address = 0x0FFFFFFC;
+	static int address = 0x10000000;
 	if (asscmd[0] == "byte"){
 		memory(address, 1, 0, decstr2dec(asscmd[1]));
 		address = address + 1;
@@ -747,7 +749,9 @@ void exec(map<int, string> PCbincmd){
 	// this command execute the code stored in PCbincmd
 	static int PC = 0;
 	auto it = PCbincmd.begin();
-	it = it + PC / 4; // 
+	int t = PC/4;
+	while (t--) it++;
+	
 	string* ins = ext_bin_inst(it->second);
 	if (ins[0] == ""){
 		// empty no command
