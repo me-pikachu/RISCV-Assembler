@@ -34,7 +34,7 @@ bool* Dec2Bin(int num, size_t size){
 			num = pow(2, size) + num;
 		}
 		
-		for (int i=0; i < size; i++){
+		for (int i=size-1; i>=0; i--){
 			array[i] = num % 2;
 			num = num / 2;
 		}		
