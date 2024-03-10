@@ -86,7 +86,6 @@ int main(int argc, char* argv[]) {
 			std::cout << "File: " << file_path << std::endl;
 			getBinCmd(file_path); // get the instruction in binary format
 			write(file_path); // write to .mc file
-			cout << "here" << endl;
 			vector_assembler_dir(); // run the assembler directive
 			std::cout << "\nBefore execution:\n";
 			dis_mem(); // display_memory

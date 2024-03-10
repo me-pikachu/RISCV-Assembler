@@ -34,7 +34,7 @@ string lex(string file_path){
         }
         
         if(s[column] == '\0'){
-            token += "\\n";
+            token += "\n";
             column = 0;
             row++;
             eof = true;

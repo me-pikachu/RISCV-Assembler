@@ -1,6 +1,7 @@
+# this is some random code
 .data
 hello: .word 45
-str: .asciiz "helloworld"
+str: .asciiz "hello world"
 
 .text:
 addi x1, x2, -0b11111111111111111111111111111111
