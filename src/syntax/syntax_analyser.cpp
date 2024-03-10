@@ -345,6 +345,7 @@ string* getcmd(string file_path){
 		}
 		return getcmd(file_path);
     }
+    else if(c[0]=='#') getcmd(file_path);
     else error();           //returning error if it does not matches any of the given command or label
     return s;
     
