@@ -39,11 +39,20 @@ map<int, int> mod_mem; // all the memory having some non zero values
 // modified_memory
 
 std::map<int, int>::iterator bin_search_add(int address){
-	
+	auto it = mod_mem.lower_bound(address);
+    if (it != mod_mem.end() && it->first == address) {
+        return it;
+    }
+    return mod_mem.end();
 }
 
 void bin_insert_add(int address, int val){
-	
+	auto it = bin_search_add(address);
+    if (it == mod_mem.end()) {
+        mod_mem.insert(std::make_pair(address, val));
+    } else {
+        it->second = val;
+    }
 }
 
 int memoryread(int address){
