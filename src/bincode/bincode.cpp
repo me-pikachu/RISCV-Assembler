@@ -49,7 +49,13 @@ bool generateBinCmd(string file_path){
 	string* cmd = getcmd(file_path);
 	// cmd = {"command_name","rd","rs1","rs2","immediate","label_name"}
 	string bincmd = "";
-	if (cmd[0] == "" && cmd[1] == "" && cmd[2] == "" && cmd[3] == "" && cmd[4] == "" && cmd[5] == "") return 0; // to stop iterating the function
+	if (cmd[0] == "" && cmd[1] == "" && cmd[2] == "" && cmd[3] == "" && cmd[4] == "" && cmd[5] == ""){
+		// to stop iterating the function and add the exit instruction
+		// exit instruction in our case is all 1's
+		PCbincmd.insert(pair<int, string>(curPC, "11111111111111111111111111111111"));
+		curPC = curPC + 4;
+		return 0;
+	}
 	
 	if (cmd[5] != "" && cmd[0] != "labelread"){
 		long long PCoflabel = -1; // initially not found
@@ -790,10 +796,13 @@ void getBinCmd(string file_path){
 	update_unfinished_cmd();
 }
 
+/*
 int main(){
 	getBinCmd("new.asm");
 	for (auto it = PCbincmd.begin(); it != PCbincmd.end(); it++){
 		cout << it->first << " " << it->second << endl;
 	}
 }
+*/
+
 
