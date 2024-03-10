@@ -178,12 +178,13 @@ string* getcmd(string file_path){
     s[4]="";
     s[5]="";
     string c=lex(file_path);
-    unsigned long len=c.length();
-    while(c=="\n") c=lex(file_path);
+    
+    while(c=="\n" || c =="") c=lex(file_path);
+	unsigned long len=c.length();
+	
     if(c=="EOF"){               //checking if it is end of the file
         return s;
-    }
-    else if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"||c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){          //checking if it is a R format instruction
+    } else if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"||c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){          //checking if it is a R format instruction
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) {
@@ -202,8 +203,7 @@ string* getcmd(string file_path){
         else error("unsupported register name");
         c=lex(file_path);
         if(c!="\n") error("expected line break");
-    }
-    else if(c=="ori"||c=="addi"||c=="andi"|| c=="slli"||c=="srli"||c=="srai"){            //checking if it is a I format instruction execpt the load and jalr commands
+    } else if(c=="ori"||c=="addi"||c=="andi" || c == "slli" || c == "srli" || c == "srai"){            //checking if it is a I format instruction execpt the load and jalr commands
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) {
@@ -223,8 +223,7 @@ string* getcmd(string file_path){
         else s[4]=to_string(n);
         c=lex(file_path);
         if(c!="\n") error("expected line break");
-    }
-    else if(c=="lb"||c=="ld"||c=="lw"||c=="lh"||c=="jalr"){       //checking if it is a load command
+    } else if(c=="lb"||c=="ld"||c=="lw"||c=="lh"||c=="jalr"){       //checking if it is a load command
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) {
@@ -246,8 +245,7 @@ string* getcmd(string file_path){
         if(c!=")") error("expected ')' here");
         c=lex(file_path);
         if(c!="\n") error("expected line break");
-    }
-    else if(c=="sb"||c=="sd"||c=="sw"||c=="sh"){         //checking if it is a store command
+    } else if(c=="sb"||c=="sd"||c=="sw"||c=="sh"){         //checking if it is a store command
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) {
@@ -269,8 +267,7 @@ string* getcmd(string file_path){
         if(c!=")") error("expected ')' here");
         c=lex(file_path);
         if(c!="\n") error("expected line break");
-    }
-    else if(c=="beq"||c=="bne"||c=="bge"||c=="blt"){            //checking if it is a branch command
+    } else if(c=="beq"||c=="bne"||c=="bge"||c=="blt"){            //checking if it is a branch command
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) s[2]=bin_index(c);
@@ -286,8 +283,7 @@ string* getcmd(string file_path){
         s[5]=c;
         c=lex(file_path);
         if(c!="\n") error("expected line break");
-    }
-    else if(c=="lui" || c=="auipc"){            //checking if it is a U format command
+    } else if(c=="lui" || c=="auipc"){            //checking if it is a U format command
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) {
@@ -302,8 +298,7 @@ string* getcmd(string file_path){
         else s[4]=to_string(m);
         c=lex(file_path);
         if(c!="\n") error("expected line break");
-    }
-    else if(c=="jal"){          //chekcing if it is a UJ format command
+    } else if(c=="jal"){          //chekcing if it is a UJ format command
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) {
@@ -316,16 +311,14 @@ string* getcmd(string file_path){
         s[5]=c;
         c=lex(file_path);
         if(c!="\n") error("expected line break");
-    }
-    else if(c[len-1]==':'){         //checking if it is a label name
+    } else if(c[len-1]==':'){         //checking if it is a label name
         string c1;
         s[0]="labelread";
         for (unsigned long i=0; i<len-1;i++) {
             c1=c1+c[i];
         }
         s[5]=c1;
-    }
-    else if(c==".data" || c == ".data:"){
+    } else if(c==".data" || c == ".data:"){
 		c = lex(file_path);
 		while (c == "\n") c= lex(file_path);
 		while (c != ".text" && c != ".text:" && c != "EOF"){
@@ -334,7 +327,6 @@ string* getcmd(string file_path){
 			c = lex(file_path);
 			while (c == "\n") c= lex(file_path);
 			assemblercmd.cmd = c;
-			cout << var << " " << c << endl;
 			if (c!=".asciiz" && c!=".byte" && c!=".word" && c!=".half" && c!=".dword") error("Expected .asciiz or .byte or .half or .word or .dword in .data");
 			c=lex(file_path);
 			assemblercmd.value = c;
@@ -344,10 +336,16 @@ string* getcmd(string file_path){
 			while (c == "\n") c= lex(file_path);
 		}
 		return getcmd(file_path);
-    }
-    else if(c[0]=='#') getcmd(file_path);
-    else error();           //returning error if it does not matches any of the given command or label
-    return s;
+    } else if(c[0]=='#'){
+		while (c != "\n") c = lex(file_path);
+		return getcmd(file_path);
+	} else if (c == "\n" || c == ""){
+		c = lex(file_path);
+		return getcmd(file_path);
+	} else {
+		error("Cannot identify the syntax");           //returning error if it does not matches any of the given command or label
+	}
+	return s;
     
 }
 //

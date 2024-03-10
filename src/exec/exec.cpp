@@ -547,14 +547,13 @@ int assembler_dir(asscmd assemblercmd){
 		memory(address, 2, 0, decstr2num(assemblercmd.value));
 		address = address + 2;
 	} else if (assemblercmd.cmd == ".word"){
-		cout  << decstr2num(assemblercmd.value) << endl;
 		memory(address, 4, 0, decstr2num(assemblercmd.value));
 		address = address + 4;
 	} else if (assemblercmd.cmd == ".dword"){
 		memory(address, 8, 0, decstr2longdec(assemblercmd.value));
 		address = address + 8;
 	} else if (assemblercmd.cmd == ".asciiz"){
-		for (int i=0; i<assemblercmd.asciiz.length(); i++){
+		for (int i=1; i<assemblercmd.asciiz.length()-1; i++){
 			memory(address, 1, 0, assemblercmd.asciiz[i]);
 			address = address + 1;
 		}
