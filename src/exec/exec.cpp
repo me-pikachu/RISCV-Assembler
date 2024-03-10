@@ -320,6 +320,13 @@ int exec_ext_bin_inst(string* ins, int PC){
 		int address = *idreg(ins[2]) + binstr2dec(ins[4]);
 		memory(address, 4, false, *idreg(ins[3]));
 		PC = PC + 4;
+	} else if (ins[0] == "sd"){
+		// address is rs1 + immediate
+		// value to store is in rs2
+		std::cout << "sd command is not supported yet. Proceding with the corresponding sw instruction\n";
+		int address = *idreg(ins[2]) + binstr2dec(ins[4]);
+		memory(address, 4, false, *idreg(ins[3]));
+		PC = PC + 4;
 		
 	} else if (ins[0] == "lb"){
 		// address is rs1 + immediate
@@ -335,6 +342,13 @@ int exec_ext_bin_inst(string* ins, int PC){
 		
 	} else if (ins[0] == "lw"){
 		// address is rs1 + immediate
+		int address = *idreg(ins[2]) + binstr2dec(ins[4]); // ins[2] is rs1 and ins[4] is imm
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = memory(address, 4, true); // ins[1] is rd
+		PC = PC + 4;
+		
+	} else if (ins[0] == "ld"){
+		// address is rs1 + immediate
+		std::cout << "ld command is not supported in 32bit RISCV. Proceding with the corresponding lw instruction\n";
 		int address = *idreg(ins[2]) + binstr2dec(ins[4]); // ins[2] is rs1 and ins[4] is imm
 		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = memory(address, 4, true); // ins[1] is rd
 		PC = PC + 4;
