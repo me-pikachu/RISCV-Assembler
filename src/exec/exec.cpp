@@ -175,7 +175,7 @@ int memory(int address, int size, bool read, int writedata = 0){
 int decstr2num(string numstr){
 	// this function converts a string of a number to an integer
 	int num = 0;
-	for (int i=numstr.length(); i>=0; i--){
+	for (int i=0; i<numstr.length(); i++){
 		num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 	}
 	
@@ -540,19 +540,20 @@ int assembler_dir(asscmd assemblercmd){
 	// returns the starting address where data is stored
 	// asscmd = {"command_name", val, ascii_str} // ascii_str is non empty only when .asciiz is used
 	static int address = 0x10000000;
-	if (assemblercmd.cmd == "byte"){
+	if (assemblercmd.cmd == ".byte"){
 		memory(address, 1, 0, decstr2num(assemblercmd.value));
 		address = address + 1;
-	} else if (assemblercmd.cmd== "half"){
+	} else if (assemblercmd.cmd== ".half"){
 		memory(address, 2, 0, decstr2num(assemblercmd.value));
 		address = address + 2;
-	} else if (assemblercmd.cmd == "word"){
+	} else if (assemblercmd.cmd == ".word"){
+		cout  << decstr2num(assemblercmd.value) << endl;
 		memory(address, 4, 0, decstr2num(assemblercmd.value));
 		address = address + 4;
-	} else if (assemblercmd.cmd == "dword"){
+	} else if (assemblercmd.cmd == ".dword"){
 		memory(address, 8, 0, decstr2longdec(assemblercmd.value));
 		address = address + 8;
-	} else if (assemblercmd.cmd == "asciiz"){
+	} else if (assemblercmd.cmd == ".asciiz"){
 		for (int i=0; i<assemblercmd.asciiz.length(); i++){
 			memory(address, 1, 0, assemblercmd.asciiz[i]);
 			address = address + 1;
