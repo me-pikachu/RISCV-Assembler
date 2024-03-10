@@ -203,7 +203,7 @@ string* getcmd(string file_path){
         c=lex(file_path);
         if(c!="\n") error("expected line break");
     }
-    else if(c=="ori"||c=="addi"||c=="andi"){            //checking if it is a I format instruction execpt the load and jalr commands
+    else if(c=="ori"||c=="addi"||c=="andi"|| c=="slli"||c=="srli"||c=="srai"){            //checking if it is a I format instruction execpt the load and jalr commands
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) {
