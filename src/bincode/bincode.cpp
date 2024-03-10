@@ -14,12 +14,12 @@ int decstr2dec(string numstr){
 	int num = 0;
 	if (numstr[0] == '-'){
 		// the number is negative
-		for (int i=numstr.length()-1; i>=1; i--){
+		for (int i=1; i < numstr.length(); i--){
 			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 		}
 		num = -1*num;
 	} else {
-		for (int i=numstr.length()-1; i>=0; i--){
+		for (int i=0; i < numstr.length(); i--){
 			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 		}
 	}	
