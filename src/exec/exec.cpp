@@ -175,7 +175,7 @@ int memory(int address, int size, bool read, int writedata = 0){
 int decstr2num(string numstr){
 	// this function converts a string of a number to an integer
 	int num = 0;
-	for (int i=numstr.length(); i>=0; i--){
+	for (int i=0; i<numstr.length(); i++){
 		num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 	}
 	
@@ -535,32 +535,40 @@ int exec_ext_bin_inst(string* ins, int PC){
 	return PC;
 }
 
-int assembler_dir(string* asscmd){
+int assembler_dir(asscmd assemblercmd){
 	// runs the assembler directives
 	// returns the starting address where data is stored
 	// asscmd = {"command_name", val, ascii_str} // ascii_str is non empty only when .asciiz is used
 	static int address = 0x10000000;
-	if (asscmd[0] == "byte"){
-		memory(address, 1, 0, decstr2num(asscmd[1]));
+	if (assemblercmd.cmd == ".byte"){
+		memory(address, 1, 0, decstr2num(assemblercmd.value));
 		address = address + 1;
-	} else if (asscmd[0] == "half"){
-		memory(address, 2, 0, decstr2num(asscmd[1]));
+	} else if (assemblercmd.cmd== ".half"){
+		memory(address, 2, 0, decstr2num(assemblercmd.value));
 		address = address + 2;
-	} else if (asscmd[0] == "word"){
-		memory(address, 4, 0, decstr2num(asscmd[1]));
+	} else if (assemblercmd.cmd == ".word"){
+		cout  << decstr2num(assemblercmd.value) << endl;
+		memory(address, 4, 0, decstr2num(assemblercmd.value));
 		address = address + 4;
-	} else if (asscmd[0] == "dword"){
-		memory(address, 8, 0, decstr2longdec(asscmd[1]));
+	} else if (assemblercmd.cmd == ".dword"){
+		memory(address, 8, 0, decstr2longdec(assemblercmd.value));
 		address = address + 8;
-	} else if (asscmd[0] == "asciiz"){
-		for (int i=0; i<asscmd[2].length(); i++){
-			memory(address, 1, 0, asscmd[2][i]);
+	} else if (assemblercmd.cmd == ".asciiz"){
+		for (int i=0; i<assemblercmd.asciiz.length(); i++){
+			memory(address, 1, 0, assemblercmd.asciiz[i]);
 			address = address + 1;
 		}
 	} else {
-		std::cout << "Invalid assemble directive\n";
+		std::cout << "Invalid Assembler directive found\n";
+		exit(1);
 	}
 	return address;
+}
+
+void vector_assembler_dir(){
+	for (auto i = ass_dir.begin(); i!=ass_dir.end(); i++){
+		assembler_dir(*i);
+	}
 }
 
 // instruction supported : 
@@ -777,6 +785,7 @@ string* ext_bin_inst(string bincmd){
 		
 	} else {
 		std::cout << "Invalid binary operation\n";
+		exit(1);
 	}
 	
 	if (insfmt == 'r'){

@@ -39,7 +39,8 @@ bool* Dec2Bin(int num, size_t size){
 			num = num / 2;
 		}		
 	} else {
-		std::cout << "Out of range immediate error\n"; 
+		std::cout << "Immediate out of range\n"; 
+		exit(1);
 	}
 	
 	return array;
@@ -121,8 +122,8 @@ bool generateBinCmd(string file_path){
 				else if (cmd[0] == "bltu") bincmd = bincmd + "110";
 				else if (cmd[0] == "bgeu") bincmd = bincmd + "111";
 				else {
-					std::cout << "Cannot identify the type of branch statement\n";
-					bincmd = bincmd + "000";
+					std::cout << "Branch statement opcode cannot be identified\n";
+					exit(1);
 				}
 				
 				// 4:1|11
@@ -706,12 +707,19 @@ void update_unfinished_cmd(){
 		}
 		
 		int offset = 0;
+		bool found = 0;
 		for(auto j = labelPC.begin(); j != labelPC.end(); ++j){
 			if (j->first == label_name){
+				found = 1;
 				// we have the PC of the label
 				offset = j->second - i; // i is the current PC
 				break;
 			}
+		}
+		
+		if (found == 0){
+			std::cout << "Label: " << label_name << " is not found\n"; 
+			exit(1);
 		}
 		
 		
@@ -768,8 +776,8 @@ void update_unfinished_cmd(){
 			else if (cmd_name == "bltu") bincmd = bincmd + "110";
 			else if (cmd_name == "bgeu") bincmd = bincmd + "111";
 			else {
-				std::cout << "Cannot identify the type of branch statement\n";
-				bincmd = bincmd + "000";
+				std::cout << "Branch statement opcode cannot be identified\n";
+				exit(1);
 			}
 			
 			// imm[4:1]
@@ -789,10 +797,7 @@ void update_unfinished_cmd(){
 }
 
 void getBinCmd(string file_path){
-	for (int i=0; i<6; i++){
-		generateBinCmd(file_path);
-	}
-	//while(generateBinCmd(file_path)){}
+	while(generateBinCmd(file_path)){}
 	update_unfinished_cmd();
 }
 
