@@ -90,7 +90,7 @@ string lex(string file_path){
             column++;
         }
         
-        while(isalnum(s[column]) || s[column] == ':'){
+        while(isalnum(s[column]) || s[column] == ':' || s[column] == '_'){
             token += s[column];
             column++;
         }
