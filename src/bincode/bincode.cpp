@@ -789,10 +789,7 @@ void update_unfinished_cmd(){
 }
 
 void getBinCmd(string file_path){
-	for (int i=0; i<6; i++){
-		generateBinCmd(file_path);
-	}
-	//while(generateBinCmd(file_path)){}
+	while(generateBinCmd(file_path)){}
 	update_unfinished_cmd();
 }
 
