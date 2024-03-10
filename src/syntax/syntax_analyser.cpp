@@ -180,7 +180,6 @@ string* getcmd(string file_path){
     string c=lex(file_path);
     while(c=="\n" || c =="") {c=lex(file_path);}
 	unsigned long len=c.length();
-	cout << "c is " << c << endl;
     if(c=="EOF"){               //checking if it is end of the file
         return s;
     } else if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"||c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){          //checking if it is a R format instruction
@@ -266,7 +265,7 @@ string* getcmd(string file_path){
         if(c!=")") error("expected ')' here");
         c=lex(file_path);
         if(c!="\n" && c[0]!='#') error("expected line break");
-    } else if(c=="beq"||c=="bne"||c=="bge"||c=="blt"){            //checking if it is a branch command
+    } else if(c=="beq"||c=="bne"||c=="bge"||c=="blt"||c=="bgt"||c=="ble"){            //checking if it is a branch command
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) s[2]=bin_index(c);
