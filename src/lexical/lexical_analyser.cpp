@@ -34,7 +34,7 @@ string lex(string file_path){
         }
         
         if(s[column] == '\0'){
-            token += "\n";
+            token += "\\n";
             column = 0;
             row++;
             eof = true;
@@ -75,6 +75,10 @@ string lex(string file_path){
         }
         
         if(s[column] == '\"'){
+            do{
+                token += s[column];
+                column++;
+            }while(s[column] != '\"');
             token += s[column];
             column++;
         }
@@ -84,10 +88,10 @@ string lex(string file_path){
             column++;
         }
         
-        if(s[column] == '\"'){
-            token += s[column];
-            column++;
-        }
+        // if(s[column] == '\"'){
+        //     token += s[column];
+        //     column++;
+        // }
         
         return token;
     }
