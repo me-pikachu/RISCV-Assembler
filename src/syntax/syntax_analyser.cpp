@@ -68,13 +68,14 @@ int str2int(string c){
             }
             if(n>2147483647) n=n-4294967296;
         }
-        else if(c[0]=='0'||c[0]=='1'||c[0]=='2'||c[0]=='3'||c[0]=='4'||c[0]=='5'||c[0]=='6'||c[0]=='7'||c[0]=='8'||c[0]=='9'){          //if it is given in decimal form then converting it to int
+        else if(c[0]=='1'||c[0]=='2'||c[0]=='3'||c[0]=='4'||c[0]=='5'||c[0]=='6'||c[0]=='7'||c[0]=='8'||c[0]=='9'){          //if it is given in decimal form then converting it to int
             i=0;
             while(k--){
                 n=n+pow(10,k)*(c[i]-48);
                 i++;
             }
         }
+		else if(c=="0") n=0;
         else error();
     }
     else if(c[0]=='-'){                 //repeating all above operations if the input string is with a negative sign
@@ -112,8 +113,9 @@ int str2int(string c){
             }
             if(n>2147483647) n=n-4294967296;
         }
-        else if(c[1]=='0'||c[1]=='1'||c[1]=='2'||c[1]=='3'||c[1]=='4'||c[1]=='5'||c[1]=='6'||c[1]=='7'||c[1]=='8'||c[1]=='9'){
+        else if(c[1]=='1'||c[1]=='2'||c[1]=='3'||c[1]=='4'||c[1]=='5'||c[1]=='6'||c[1]=='7'||c[1]=='8'||c[1]=='9'){
             i=1;
+			k=k-1;
             while(k--){
                 n=n+pow(10,k)*(c[i]-48);
                 i++;

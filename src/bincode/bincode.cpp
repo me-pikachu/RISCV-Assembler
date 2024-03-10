@@ -14,12 +14,12 @@ int decstr2dec(string numstr){
 	int num = 0;
 	if (numstr[0] == '-'){
 		// the number is negative
-		for (int i=1; i < numstr.length(); i--){
+		for (int i=1; i < numstr.length(); i++){
 			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 		}
 		num = -1*num;
 	} else {
-		for (int i=0; i < numstr.length(); i--){
+		for (int i=0; i < numstr.length(); i++){
 			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
 		}
 	}	
@@ -34,7 +34,7 @@ bool* Dec2Bin(int num, size_t size){
 			num = pow(2, size) + num;
 		}
 		
-		for (int i=size-1; i>=0; i--){
+		for (int i=0; i<size; i++){
 			array[i] = num % 2;
 			num = num / 2;
 		}		
@@ -588,7 +588,8 @@ bool generateBinCmd(string file_path){
 					std::cout << "The value of immediate should be between 0 to 31\n";
 				} else {
 					bincmd = bincmd + func7;
-					bool* binimd = Dec2Bin(num, 5); // immediate is of 5 bits
+					
+					bool* binimd = Dec2Bin(num, 6); // immediate is of 5 bits (but all 5 bits can be 1)
 					// adding the 12 bits of immediate
 					char digchar;
 					for (int j=4; j>=0; j--){
@@ -604,7 +605,6 @@ bool generateBinCmd(string file_path){
 				
 			} else {
 				bool* binimd = Dec2Bin(decstr2dec(cmd[4]), 12); // immediate is of 12 bits
-			
 				// adding the 12 bits of immediate
 				char digchar;
 				for (int j=11; j>=0; j--){
@@ -613,8 +613,7 @@ bool generateBinCmd(string file_path){
 				}
 				
 				bincmd = bincmd + cmd[2] + func3 + cmd[1] + opcode; // rs1 func3 rd opcode
-			}
-			
+			}			
 			
 		} else if (insfmt == 's'){
 			bool* binimd = Dec2Bin(decstr2dec(cmd[4]), 12); // immediate is of 12 bits
