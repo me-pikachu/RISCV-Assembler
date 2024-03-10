@@ -559,7 +559,8 @@ int assembler_dir(asscmd assemblercmd){
 			address = address + 1;
 		}
 	} else {
-		std::cout << "Invalid assemble directive\n";
+		std::cout << "Invalid Assembler directive found\n";
+		exit(1);
 	}
 	return address;
 }
@@ -784,6 +785,7 @@ string* ext_bin_inst(string bincmd){
 		
 	} else {
 		std::cout << "Invalid binary operation\n";
+		exit(1);
 	}
 	
 	if (insfmt == 'r'){
