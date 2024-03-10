@@ -21,6 +21,9 @@ string lex(string file_path){
     ifstream MyFile(file_path);
     string s="";
     for(int i = 0; i<=row; i++){
+        if(MyFile.eof()){
+            return "EOF";
+        }
         getline(MyFile, s);
     }
 
