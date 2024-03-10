@@ -73,6 +73,13 @@ string lex(string file_path){
             token += s[column];
             column++;
         }
+
+        if(s[column] == '#'){
+            do{
+                token += s[column];
+                column++;
+            }while(s[column] != '\0');
+        }
         
         if(s[column] == '\"'){
             do{
