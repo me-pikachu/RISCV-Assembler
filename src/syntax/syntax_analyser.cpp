@@ -325,6 +325,15 @@ string* getcmd(string file_path){
 			assemblercmd.asciiz = c;
 			ass_dir.push_back(assemblercmd);
 			c = lex(file_path);
+			if (c != "\n" && assemblercmd.cmd == ".asciiz") error("Invalid .asciiz directive");
+			while (c != "\n"){
+				asscmd temp;
+				temp.cmd = assemblercmd.cmd;
+				temp.value = c;
+				temp.asciiz = c;
+				ass_dir.push_back(temp);
+				c = lex(file_path);
+			}
 			while (c == "\n") c= lex(file_path);
 		}
 		return getcmd(file_path);

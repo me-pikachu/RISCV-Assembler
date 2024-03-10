@@ -56,7 +56,7 @@ mergesort:
     # since the basecondition directly returns not making further recursive calls we don't need to update the stack pointer...
     # ... until we reach a recursive condition
     basecondition1: bne x19, x20, notbasecase1
-    jalr x0, x1, 0
+    jalr x0, 0(x1)
     notbasecase1: 
         add x30, x19, x20 # high+low
         srli x30, x30, 1 # (high+low)/2 # srli == shift right logical immediate
@@ -226,7 +226,7 @@ mergesort:
        addi x31, x31, 1 # x31 = high-low+1
        slli x31, x31, 2 # x31 = 4*(high-low+1)
        add x2, x2, x31 # x2 = x2 + x31
-       jalr x0, x1, 0 # x1 was removed from the stack long time ago when there was no further recursive calls
+       jalr x0, 0(x1) # x1 was removed from the stack long time ago when there was no further recursive calls
 main:
     lui x18, 0x10000
     lw x19, 0(x18)

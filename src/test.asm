@@ -1,6 +1,6 @@
 # this is some random code
 .data
-hello: .word 45
+hello: .half 45 10
 str: .asciiz "hello world"
 
 .text:
