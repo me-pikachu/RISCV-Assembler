@@ -137,9 +137,9 @@ int memory(int address, int size, bool read, int writedata = 0){
 		if (size == 1){
 			return memoryread(address);
 		} else if (size == 2){
-			return memoryread(address+1) << 8 + memoryread(address);
+			return(memoryread(address+1) << 8) + memoryread(address);
 		} else if (size == 4){
-			return memoryread(address+3) << 24 + memoryread(address+2) << 16 + memoryread(address+1) << 8 + memoryread(address);
+			return (memoryread(address+3) << 24) + (memoryread(address+2) << 16) + (memoryread(address+1) << 8) + memoryread(address);
 		}
 	} else {
 		if (size == 1){
@@ -417,12 +417,12 @@ int exec_ext_bin_inst(string* ins, int PC){
 		
 	} else if (ins[0] == "auipc"){
 		// the destination register cannot be x0
-		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = binstr2dec(ins[4]) << 12 + PC; // shift by 12 bits and add current PC
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = (binstr2dec(ins[4]) << 12) + PC; // shift by 12 bits and add current PC
 		PC = PC + 4;
 		
 	} else if (ins[0] == "lui"){
 		// the destination register cannot be x0
-		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = binstr2dec(ins[4]) << 12; // shift by 12 bits
+		if (idreg(ins[1]) != &x0) *idreg(ins[1]) = (binstr2dec(ins[4]) << 12); // shift by 12 bits
 		PC = PC + 4;
 		
 	} else if (ins[0] == "jal"){
@@ -431,27 +431,27 @@ int exec_ext_bin_inst(string* ins, int PC){
 		PC = PC + binstr2dec(ins[4]);
 		
 	} else if (ins[0] == "beq"){
-		if (idreg(ins[2]) == idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		if (*idreg(ins[2]) == *idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
 		else PC = PC + 4;
 		
 	} else if (ins[0] == "bne"){
-		if (idreg(ins[2]) != idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		if (*idreg(ins[2]) != *idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
 		else PC = PC + 4;
 		
 	} else if (ins[0] == "blt"){
-		if (idreg(ins[2]) < idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		if (*idreg(ins[2]) < *idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
 		else PC = PC + 4;
 		
 	} else if (ins[0] == "bgt"){
-		if (idreg(ins[2]) > idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		if (*idreg(ins[2]) > *idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
 		else PC = PC + 4;
 		
 	} else if (ins[0] == "ble"){
-		if (idreg(ins[2]) <= idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		if (*idreg(ins[2]) <= *idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
 		else PC = PC + 4;
 		
 	} else if (ins[0] == "bge"){
-		if (idreg(ins[2]) >= idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
+		if (*idreg(ins[2]) >= *idreg(ins[3]))	PC = PC + binstr2dec(ins[4]);
 		else PC = PC + 4;
 		
 	} else if (ins[0] == "add"){
@@ -821,31 +821,6 @@ string* ext_bin_inst(string bincmd){
 	return ins;
 }
 
-void exec(map<int, string> PCbincmd){
-	// this command execute the code stored in PCbincmd
-	static int PC = 0;
-	auto it = PCbincmd.begin();
-	
-	if (PC > (PCbincmd.size()-1)*4 || PC < 0){
-		// if PC is negative then break or if PC increase the map size PC counter then break (the binary code does not have exit code)
-		if (PC < 0) std::cout << "Warning! The PC reached a -ve value\n";
-		return;
-	}
-	
-	int t = PC/4;
-	while (t--) it++;
-	
-	string* ins = ext_bin_inst(it->second);
-	
-	if (ins[0] == ""){
-		// empty no command
-		return;
-	} else{
-		PC = exec_ext_bin_inst(ins, PC);
-		exec(PCbincmd);
-	}
-}
-
 void dis_mem(){
 	std::cout << "x0 : 0x" << int2hex_8byte(x0) << "\nx1 : 0x" << int2hex_8byte(x1) << "\nx2 : 0x" << int2hex_8byte(x2) << "\nx3 : 0x" << int2hex_8byte(x3) << "\nx4 : 0x" << int2hex_8byte(x4) << "\nx5 : 0x" << int2hex_8byte(x5) << "\nx6 : 0x" << int2hex_8byte(x6) << "\nx7 : 0x" << int2hex_8byte(x7) << "\nx8 : 0x" << int2hex_8byte(x8) << "\nx9 : 0x" << int2hex_8byte(x9) << "\nx10 : 0x" << int2hex_8byte(x10) << "\nx11 : 0x" << int2hex_8byte(x11) << "\nx12 : 0x" << int2hex_8byte(x12) << "\nx13 : 0x" << int2hex_8byte(x13) << "\nx14 : 0x" << int2hex_8byte(x14) << "\nx15 : 0x" << int2hex_8byte(x15) << "\nx16 : 0x" << int2hex_8byte(x16) << "\nx17 : 0x" << int2hex_8byte(x17) << "\nx18 : 0x" << int2hex_8byte(x18) << "\nx19 : 0x" << int2hex_8byte(x19) << "\nx20 : 0x" << int2hex_8byte(x20) << "\nx21 : 0x" << int2hex_8byte(x21) << "\nx22 : 0x" << int2hex_8byte(x22) << "\nx23 : 0x" << int2hex_8byte(x23) << "\nx24 : 0x" << int2hex_8byte(x24) << "\nx25 : 0x" << int2hex_8byte(x25) << "\nx26 : 0x" << int2hex_8byte(x26) << "\nx27 : 0x" << int2hex_8byte(x27) << "\nx28 : 0x" << int2hex_8byte(x28) << "\nx29 : 0x" << int2hex_8byte(x29) << "\nx30 : 0x" << int2hex_8byte(x30) << "\nx31 : 0x" << int2hex_8byte(x31);
 	if (mod_mem.size() != 0) std::cout << "\n           +3 +2 +1 +0" << endl;
@@ -870,6 +845,31 @@ void dis_mem(){
 		prev_add = address;
 		
 		cout << "0x" << int2hex_8byte(address) << " " << int2hex_2byte(memoryread(address + 3)) << " " << int2hex_2byte(memoryread(address + 2)) << " " << int2hex_2byte(memoryread(address + 1)) << " " << int2hex_2byte(memoryread(address)) << endl;
+	}
+}
+
+void exec(map<int, string> PCbincmd){
+	// this command execute the code stored in PCbincmd
+	static int PC = 0;
+	auto it = PCbincmd.begin();
+	
+	if (PC > (PCbincmd.size()-1)*4 || PC < 0){
+		// if PC is negative then break or if PC increase the map size PC counter then break (the binary code does not have exit code)
+		if (PC < 0) std::cout << "Warning! The PC reached a -ve value\n";
+		return;
+	}
+	
+	int t = PC/4;
+	while (t--) it++;
+	
+	string* ins = ext_bin_inst(it->second);
+	
+	if (ins[0] == ""){
+		// empty no command
+		return;
+	} else{
+		PC = exec_ext_bin_inst(ins, PC);
+		exec(PCbincmd);
 	}
 }
 
