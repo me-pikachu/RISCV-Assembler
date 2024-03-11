@@ -90,6 +90,17 @@ string int2hex_2byte(int num){
 	return hex;
 }
 
+int logicalrightshift(int num, int n){
+	// performs logical right shift
+	if (num < 0){
+		num = (num >> 1) + 0x80000000; // operator precedence is important as to first perform right shift and then add 
+		if (n > 1) return num >> (n-1);
+		else return num;
+	} else {
+		return num >> (n);
+	}
+}
+
 std::map<unsigned int, int>::iterator bin_search_add(int address){
 	// performs a search in the map for the address and return the corresponding iterator
 	auto it = mod_mem.lower_bound(address);
@@ -161,13 +172,13 @@ int memory(int address, int size, bool read, int writedata = 0){
 			memorywrite(address, val);
 			val = writedata;
 			val = val & 0x0000ff00; // second last byte
-			memorywrite(address+1, val);
+			memorywrite(address+1, logicalrightshift(val,8));
 			val = writedata;
 			val = val & 0x00ff0000; // second byte
-			memorywrite(address+2, val);
+			memorywrite(address+2, logicalrightshift(val,16));
 			val = writedata;
 			val = val & 0xff000000; // first byte
-			memorywrite(address+3, val);
+			memorywrite(address+3, logicalrightshift(val,24));
 		}
 	}
 }
@@ -204,17 +215,6 @@ int binstr2dec(string binstr){
 	}
 	
 	return num;
-}
-
-int logicalrightshift(int num, int n){
-	// performs logical right shift
-	if (num < 0){
-		num = (num >> 1) + 0x80000000; // operator precedence is important as to first perform right shift and then add 
-		if (n > 1) return num >> (n-1);
-		else return num;
-	} else {
-		return num >> (n-1);
-	}
 }
 
 int* idreg(string reg){
