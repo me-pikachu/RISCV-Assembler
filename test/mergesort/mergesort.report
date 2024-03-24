@@ -1,4 +1,3 @@
-# This is a manually generated report
 File: mergesort.asm
 
 Before execution:
@@ -110,3 +109,4 @@ Static Taken: 60.3015%
 Static Not Taken: 39.6985%
 Dynamic One Bit: 65.3266%
 Dynamic Two Bit: 68.8442%
+
