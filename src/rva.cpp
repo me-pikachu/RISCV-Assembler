@@ -2,7 +2,7 @@
 #include <fstream>
 #include "bincode/bincode.cpp"
 #include "exec/exec.cpp"
-
+#include "branch_predictor/predictor.cpp"
 using namespace std;
 
 string int2hex(int num){
@@ -56,7 +56,7 @@ string bin2hex(string bin){
 	return hex;
 }
 
-void write(string file_path){
+void write_mc(string file_path){
 	// we have to remove the .asm extension and add the .mc extension to it
 	int ex = file_path.length();
 	for (int i = file_path.length()-1; i >=0; --i){
@@ -79,19 +79,45 @@ void write(string file_path){
 	MyFile.close();
 }
 
+void write_trace(string file_path){
+	// we have to remove the .asm extension and add the .mc extension to it
+	int ex = file_path.length();
+	for (int i = file_path.length()-1; i >=0; --i){
+		if (file_path[i] == '.'){
+			ex = i;
+			break;
+		}
+	}
+	
+	string filename = "";
+	for (int i=0; i<ex; ++i){
+		filename = filename + file_path[i];
+	}
+	
+	string new_path = filename + ".trace";
+	ofstream MyFile(new_path);
+	for (auto it = PCtrace.begin(); it != PCtrace.end(); it++){
+		MyFile << "0x" << int2hex_8byte(*it) << "\n";
+	}
+	MyFile.close();
+}
+
 int main(int argc, char* argv[]) {
 	if (argc >= 2){
 		for (int i=1; i<argc; i++){
 			string file_path(argv[1]);
 			std::cout << "File: " << file_path << std::endl;
 			getBinCmd(file_path); // get the instruction in binary format
-			write(file_path); // write to .mc file
+			write_mc(file_path); // write to .mc file
 			vector_assembler_dir(); // run the assembler directive
 			std::cout << "\nBefore execution:\n";
 			dis_mem(); // display_memory
 			exec(PCbincmd); // execute instruction in the binary format
 			std::cout << "\n\nAfter execution:\n";
+			write_trace(file_path); // write to the trace file
 			dis_mem(); // display_memory
+			check_acc_bp(); // print branch predictor accuracy
+			std::cout << "\n";
 		}
 	} else {
 		std::cout << "Please enter a filename" << endl;

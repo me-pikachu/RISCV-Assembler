@@ -38,8 +38,8 @@
 #}
 
 .data
-size: .word 10
-array: .word 5 1 2 3 10 4 6 6 6 6
+size: .word 7
+array: .word 5 1 2 3 10 4 6
 
 .text
 # x18 -> base address of the array

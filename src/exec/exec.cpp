@@ -36,6 +36,7 @@ static int x30 = 0;
 static int x31 = 0;
 
 static map<unsigned int, int> mod_mem; // all the memory having some non zero values
+vector<int> PCtrace;
 // modified_memory
 
 string int2hex_8byte(int num){
@@ -868,6 +869,7 @@ void exec(map<int, string> PCbincmd){
 		// empty no command
 		return;
 	} else{
+		PCtrace.push_back(PC);
 		PC = exec_ext_bin_inst(ins, PC);
 		exec(PCbincmd);
 	}

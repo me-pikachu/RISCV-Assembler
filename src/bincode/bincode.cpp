@@ -110,17 +110,21 @@ bool generateBinCmd(string file_path){
 					bincmd = bincmd + digchar;
 				}
 				
-				// now we have the rs2 field
-				bincmd = bincmd + cmd[3];
-				// now we have the rs1 field
-				bincmd = bincmd + cmd[2];
+				if (cmd[0] == "bgt" || cmd[0] == "ble" || cmd[0] == "bgtu" || cmd[0] == "bleu"){
+					// interchange rs1 and rs2
+					bincmd = bincmd + cmd[2] + cmd[3];
+				} else{
+					// now we have the rs2 and rs1 field
+					bincmd = bincmd + cmd[3] + cmd[2];
+				}
+				
 				// now we have func3
 				if (cmd[0] == "beq") bincmd = bincmd + "000";
 				else if (cmd[0] == "bne") bincmd = bincmd + "001";
-				else if (cmd[0] == "blt") bincmd = bincmd + "100";
-				else if (cmd[0] == "bge") bincmd = bincmd + "101";
-				else if (cmd[0] == "bltu") bincmd = bincmd + "110";
-				else if (cmd[0] == "bgeu") bincmd = bincmd + "111";
+				else if (cmd[0] == "blt" || cmd[0] == "bgt") bincmd = bincmd + "100";
+				else if (cmd[0] == "bge" || cmd[0] == "ble") bincmd = bincmd + "101";
+				else if (cmd[0] == "bltu" || cmd[0] == "bgtu") bincmd = bincmd + "110";
+				else if (cmd[0] == "bgeu" || cmd[0] == "bleu") bincmd = bincmd + "111";
 				else {
 					std::cout << "Branch statement opcode cannot be identified\n";
 					exit(1);
@@ -163,10 +167,10 @@ bool generateBinCmd(string file_path){
 		char insfmt = ' ';
 		
 		// instruction supported : 
-		// i format : lb, lh, lw, ld, lbu, lhu, lwu, fence, fence.i, addi, addiw, andi, ori, xori, slli, srli, srai, slliw, srliw, sraiw, slti, sltiu, sgti, sgtiu, slei, sleiu, sgei, sgeiu, jalr, ecall, ebreak, CSRRW, CSRRS, CSRRC, CSRRWT, CSRRST, CSRRCT
+		// i format : lb, lh, lw, ld, lbu, lhu, lwu, fence, fence.i, addi, addiw, andi, ori, xori, slli, srli, srai, slliw, srliw, sraiw, slti, sltiu, jalr, ecall, ebreak, CSRRW, CSRRS, CSRRC, CSRRWT, CSRRST, CSRRCT
 		// r format : add, addw, sub, subw, mul, div, rem, sll, sllw, srl, srlw, sra, sraw, and, or, xor, slt, sltu, sgt, sgtu, sle, sleu, sge, sgeu	
 		// s format : sb, sh, sw, sd
-		// sb format : beq, bne, blt, bgt, ble, bge (above)
+		// sb format : beq, bne, blt, bgt, ble, bge, bltu, bgtu, bleu, bgeu (above)
 		// u format : auipc, lui
 		// uj format : jal (above)
 		
@@ -279,39 +283,123 @@ bool generateBinCmd(string file_path){
 			func7 = "0000000";
 			
 		} else if (cmd[0] == "sgt"){
+			// same as slt but rs1 and rs2 get interchanged
 			insfmt = 'r';
-			opcode = "";
-			func3 = "";
-			func7 = "";
+			opcode = "0110011";
+			func3 = "010";
+			func7 = "0000000";
+			string temp = cmd[2];
+			cmd[2] = cmd[3];
+			cmd[3] = temp;
 			
 		} else if (cmd[0] == "sgtu"){
+			// same as sltu but rs1 and rs2 get interchanged
 			insfmt = 'r';
-			opcode = "";
-			func3 = "";
-			func7 = "";
+			opcode = "0110011";
+			func3 = "011";
+			func7 = "0000000";
+			string temp = cmd[2];
+			cmd[2] = cmd[3];
+			cmd[3] = temp;
 			
 		} else if (cmd[0] == "sle"){
+			// slt rd, rs2, rs1
+			// xori rd, rd, 1
+			/*
 			insfmt = 'r';
-			opcode = "";
-			func3 = "";
-			func7 = "";
+			opcode = "0110011";
+			func3 = "010";
+			func7 = "0000000";
+			*/
+			// slt rd, rs2, rs1
+			bincmd = "0000000" + cmd[2] + cmd[3] + "010" + cmd[1] + "0110011";
+			PCbincmd.insert(pair<int, string>(curPC, bincmd));
+			curPC = curPC + 4;
+			bincmd = "";
 			
-		} else if (cmd[0] == "sleu"){
-			insfmt = 'r';
-			opcode = "";
-			func3 = "";
+			// xori rd, rd, 1
+			cmd[0] = "xori";
+			cmd[2] = cmd[1]; // rd
+			cmd[4] = "1";
+			
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "100";
 			func7 = "";
 			
 		} else if (cmd[0] == "sge"){
+			// slt rd, rs1, rs2
+			// xori rd, rd, 1
+			/*
 			insfmt = 'r';
-			opcode = "";
-			func3 = "";
+			opcode = "0110011";
+			func3 = "010";
+			func7 = "0000000";
+			*/
+			// slt rd, rs1, rs2
+			bincmd = "0000000" + cmd[3] + cmd[2] + "010" + cmd[1] + "0110011";
+			PCbincmd.insert(pair<int, string>(curPC, bincmd));
+			curPC = curPC + 4;
+			bincmd = "";
+			
+			// xori rd, rd, 1
+			cmd[0] = "xori";
+			cmd[2] = cmd[1]; // rd
+			cmd[4] = "1";
+			
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "100";
+			func7 = "";
+			
+		} else if (cmd[0] == "sleu"){
+			// sltu rd, rs2, rs1
+			// xori rd, rd, 1
+			/*
+			insfmt = 'r';
+			opcode = "0110011";
+			func3 = "011";
+			func7 = "0000000";
+			*/
+			// slt rd, rs2, rs1
+			bincmd = "0000000" + cmd[2] + cmd[3] + "011" + cmd[1] + "0110011";
+			PCbincmd.insert(pair<int, string>(curPC, bincmd));
+			curPC = curPC + 4;
+			bincmd = "";
+			
+			// xori rd, rd, 1
+			cmd[0] = "xori";
+			cmd[2] = cmd[1]; // rd
+			cmd[4] = "1";
+			
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "100";
 			func7 = "";
 			
 		} else if (cmd[0] == "sgeu"){
+			// sltu rd, rs1, rs2
+			// xori rd, rd, 1
+			/*
 			insfmt = 'r';
-			opcode = "";
-			func3 = "";
+			opcode = "0110011";
+			func3 = "011";
+			func7 = "0000000";
+			*/
+			// slt rd, rs1, rs2
+			bincmd = "0000000" + cmd[3] + cmd[2] + "011" + cmd[1] + "0110011";
+			PCbincmd.insert(pair<int, string>(curPC, bincmd));
+			curPC = curPC + 4;
+			bincmd = "";
+			
+			// xori rd, rd, 1
+			cmd[0] = "xori";
+			cmd[2] = cmd[1]; // rd
+			cmd[4] = "1";
+			
+			insfmt = 'i';
+			opcode = "0010011";
+			func3 = "100";
 			func7 = "";
 			
 		} else if (cmd[0] == "sb"){
@@ -468,42 +556,6 @@ bool generateBinCmd(string file_path){
 			insfmt = 'i';
 			opcode = "0010011";
 			func3 = "011";
-			func7 = "";
-			
-		} else if (cmd[0] == "sgti"){
-			insfmt = 'i';
-			opcode = "";
-			func3 = "";
-			func7 = "";
-			
-		} else if (cmd[0] == "sgtiu"){
-			insfmt = 'i';
-			opcode = "";
-			func3 = "";
-			func7 = "";
-			
-		} else if (cmd[0] == "slei"){
-			insfmt = 'i';
-			opcode = "";
-			func3 = "";
-			func7 = "";
-			
-		} else if (cmd[0] == "sleiu"){
-			insfmt = 'i';
-			opcode = "";
-			func3 = "";
-			func7 = "";
-			
-		} else if (cmd[0] == "sgei"){
-			insfmt = 'i';
-			opcode = "";
-			func3 = "";
-			func7 = "";
-			
-		} else if (cmd[0] == "sgeiu"){
-			insfmt = 'i';
-			opcode = "";
-			func3 = "";
 			func7 = "";
 			
 		} else if (cmd[0] == "jalr"){
@@ -751,44 +803,48 @@ void update_unfinished_cmd(){
 			bincmd = bincmd + rd + "1101111";
 			
 		} else {
-			bool* binoffset = Dec2Bin(offset, 13); // 13 bit immediate
-			
-			// imm[12]
 			char digchar;
-			digchar = '0' + binoffset[12];
-			bincmd = bincmd + digchar;
+			bool* binOffset = Dec2Bin(offset, 13); // branch have 13 bit offset field
 			
-			// imm[10:5]
-			for (int k=10; k>=5; k--){
-				digchar = '0' + binoffset[k];
+			// 12|10:5
+			digchar = '0' + binOffset[12];
+			bincmd = bincmd + digchar;
+			for (int j=10; j>=5; j--){
+				digchar = '0' + binOffset[j];
 				bincmd = bincmd + digchar;
 			}
 			
-			// rs2 rs1
-			bincmd = bincmd + rs2 + rs1;
+			if (cmd_name == "bgt" || cmd_name == "ble" || cmd_name == "bgtu" || cmd_name == "bleu"){
+				// interchange rs1 and rs2
+				bincmd = bincmd + rs1 + rs2;
+			} else {
+				// now we have the rs2 and rs1 field
+				bincmd = bincmd + rs2 + rs1;
+			}
 			
-			// func3
-			if (cmd_name == "beq")bincmd = bincmd + "000";
+			// now we have func3
+			if (cmd_name == "beq") bincmd = bincmd + "000";
 			else if (cmd_name == "bne") bincmd = bincmd + "001";
-			else if (cmd_name == "blt") bincmd = bincmd + "100";
-			else if (cmd_name == "bge") bincmd = bincmd + "101";
-			else if (cmd_name == "bltu") bincmd = bincmd + "110";
-			else if (cmd_name == "bgeu") bincmd = bincmd + "111";
+			else if (cmd_name == "blt" || cmd_name == "bgt") bincmd = bincmd + "100";
+			else if (cmd_name == "bge" || cmd_name == "ble") bincmd = bincmd + "101";
+			else if (cmd_name == "bltu" || cmd_name == "bgtu") bincmd = bincmd + "110";
+			else if (cmd_name == "bgeu" || cmd_name == "bleu") bincmd = bincmd + "111";
 			else {
 				std::cout << "Branch statement opcode cannot be identified\n";
 				exit(1);
 			}
 			
-			// imm[4:1]
-			for (int k=4; k>=1; k--){
-				digchar = '0' + binoffset[k];
+			// 4:1|11
+			for (int j=4; j>=1; j--){
+				digchar = '0' + binOffset[j];
 				bincmd = bincmd + digchar;
 			}
-			
-			// imm[11]
-			digchar = '0' + binoffset[11];
+			digchar = '0' + binOffset[11];
 			bincmd = bincmd + digchar;
+			free(binOffset);
+			// free up the space used by the array
 			
+			// now we have opcode of conditional branch
 			bincmd = bincmd + "1100011";
 		}
 		it->second = bincmd; // update the PCbincmd

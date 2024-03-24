@@ -35,7 +35,7 @@ int str2int(string c){
     unsigned long k=c.length();
     if(c[0]!='-'){                                      //if the given number is without a negative sign
         if(c[0]=='0'&&(c[1]=='x'|| c[1]=='X')){         //if the number given in hexadecimal form then converting it to int
-            i=2;
+			i=2;
             int loop=k-2;
             while(loop--){
                 if(c[i]=='a'|| c[i]=='A') n=n+pow(16,loop)*10;
@@ -44,7 +44,7 @@ int str2int(string c){
                 else if(c[i]=='d'|| c[i]=='D') n=n+pow(16,loop)*13;
                 else if(c[i]=='e'|| c[i]=='E') n=n+pow(16,loop)*14;
                 else if(c[i]=='f'|| c[i]=='F') n=n+pow(16,loop)*15;
-                else if(c[i]=='0'||c[i]=='1'||c[i]=='2'||c[i]=='3'||c[i]=='4'||c[i]=='5'||c[i]=='6'||c[i]=='7'||c[i]=='8'||c[i]=='9') n=n+pow(2,loop)*(c[i]-48);
+                else if(c[i]=='0'||c[i]=='1'||c[i]=='2'||c[i]=='3'||c[i]=='4'||c[i]=='5'||c[i]=='6'||c[i]=='7'||c[i]=='8'||c[i]=='9') n=n+pow(16,loop)*(c[i]-48);
                 else error();
                 i++;
             }
@@ -89,7 +89,7 @@ int str2int(string c){
                 else if(c[i]=='d'|| c[i]=='D') n=n+pow(16,loop)*13;
                 else if(c[i]=='e'|| c[i]=='E') n=n+pow(16,loop)*14;
                 else if(c[i]=='f'|| c[i]=='F') n=n+pow(16,loop)*15;
-                else if(c[i]=='0'||c[i]=='1'||c[i]=='2'||c[i]=='3'||c[i]=='4'||c[i]=='5'||c[i]=='6'||c[i]=='7'||c[i]=='8'||c[i]=='9') n=n+pow(2,loop)*(c[i]-48);
+                else if(c[i]=='0'||c[i]=='1'||c[i]=='2'||c[i]=='3'||c[i]=='4'||c[i]=='5'||c[i]=='6'||c[i]=='7'||c[i]=='8'||c[i]=='9') n=n+pow(16,loop)*(c[i]-48);
                 else error();
                 i++;
             }
@@ -184,7 +184,7 @@ string* getcmd(string file_path){
 	unsigned long len=c.length();
     if(c=="EOF"){               //checking if it is end of the file
         return s;
-    } else if(c=="add"||c=="and"||c=="sll"||c=="slt"||c=="sra"||c=="srl"||c=="sub"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){          //checking if it is a R format instruction
+    } else if(c=="add"||c=="addw"||c=="and"||c=="sll"||c=="slt"||c=="sltu"||c=="sgt"||c=="sgtu"||c=="sle"||c=="sge"||c=="sra"||c=="srl"||c=="sub"||c=="subw"||c=="xor"||c=="mul"||c=="div"||c=="rem"||c=="or"){          //checking if it is a R format instruction
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) {
@@ -267,7 +267,7 @@ string* getcmd(string file_path){
         if(c!=")") error("expected ')' here");
         c=lex(file_path);
         if(c!="\n" && c[0]!='#') error("expected line break");
-    } else if(c=="beq"||c=="bne"||c=="bge"||c=="blt"||c=="bgt"||c=="ble"){            //checking if it is a branch command
+    } else if(c=="beq"||c=="bne"||c=="blt"||c=="bgt"||c=="ble"||c=="bge"||c=="bltu"||c=="bgtu"||c=="bleu"||c=="bgeu"){  //checking if it is a branch command
         s[0]=c;
         c=lex(file_path);
         if(check_register(c)) s[2]=bin_index(c);
@@ -328,6 +328,10 @@ string* getcmd(string file_path){
 			c = lex(file_path);
 			if (c != "\n" && assemblercmd.cmd == ".asciiz") error("Invalid .asciiz directive");
 			while (c != "\n"){
+				if (c == "," || c[0] == '#') {
+					c = lex(file_path);
+					continue; // go to next execution of the loop
+				}
 				asscmd temp;
 				temp.cmd = assemblercmd.cmd;
 				temp.value = c;
