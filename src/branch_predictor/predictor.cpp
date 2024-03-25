@@ -3,8 +3,11 @@
 using namespace std;
 
 static map<int, bool> branch_history_1bit; // PC with their correponding taken and not taken
-static map<int, int> branch_history_2bit; // PC with their 2bit state value (SNT, NT, T, ST)
+static map<int, int> branch_history_2bit_nt; // PC with their 2bit state value (SNT, NT, T, ST)
+static map<int, int> branch_history_2bit_t; // PC with their 2bit state value (SNT, NT, T, ST)
 // 0 for SNT, 1 for NT, 2 for T and 3 for ST
+int state_2bit[4][2] = {{0, 1}, {0, 2}, {1, 3}, {2, 3}}; // 2D array graph for the states
+static map<int, int> btb; // branch target buffer
 
 std::map<int, bool>::iterator search(map<int, bool>* branch, int PC){
 	// performs a search in the map for the address and return the corresponding iterator
@@ -52,12 +55,12 @@ bool static_nottaken(int PC){
 	return 0; // always not taken
 }
 
-bool onebit(int PC){
+bool onebit(int PC, bool def){
 	auto it = search(&branch_history_1bit, PC);
 	if (it->first == PC){
 		return it->second;
 	} else {
-		return 0; // always not taken if coming on that branch first time
+		return def; // return default state
 	}
 }
 
@@ -66,36 +69,47 @@ void feedback_onebit(int PC, bool taken){
 	auto it = search(&branch_history_1bit, PC);
 }
 
-bool twobit(int PC){
-	auto it = search(&branch_history_2bit, PC);
-	if (it->first == PC){
-		int pred = it->second;
-		if (pred == 0 || pred == 1) return 0; // SNT or NT
-		else return 1; // T or ST
+bool twobit(int PC, int def){
+	if (def == 0){
+		auto it = search(&branch_history_2bit_nt, PC);
+		if (it->first == PC){
+			int pred = it->second;
+			if (pred == 0 || pred == 1) return 0; // SNT or NT
+			else return 1; // T or ST
+		} else {
+			return 0; // return default state
+		}
 	} else {
-		return 0; // always not taken if coming on that branch first time
+		auto it = search(&branch_history_2bit_t, PC);
+		if (it->first == PC){
+			int pred = it->second;
+			if (pred == 0 || pred == 1) return 0; // SNT or NT
+			else return 1; // T or ST
+		} else {
+			return 1; // return default state
+		}
 	}
 }
 
-void feedback_twobit(int PC, bool taken){
-	auto it = search(&branch_history_2bit, PC);
+void feedback_twobit_nt(int PC, bool taken){
+	auto it = search(&branch_history_2bit_nt, PC);
 	if (it->first == PC){
-		int pred = it->second;
-		// decrease the state if not taken
-		// increase the state if taken
-		if (taken){
-			pred++;
-		} else {
-			pred--;
-		}
-		
-		// make sure that pred is in range [0,3]
-		if (pred < 0) pred++; 
-		else if (pred > 3) pred--;
-		insert(&branch_history_2bit, PC, pred);
-		
+		int finalstate = state_2bit[it->second][taken]; // 2D array for calculating next state
+		insert(&branch_history_2bit_nt, PC, finalstate);
 	} else {
-		insert(&branch_history_2bit, PC, taken+1); // if (taken == 0) -> NT and if (taken == 1) -> T
+		int finalstate = state_2bit[1][taken]; // 2D array for calculating next state, current state is NT
+		insert(&branch_history_2bit_nt, PC, finalstate);
+	}
+}
+
+void feedback_twobit_t(int PC, bool taken){
+	auto it = search(&branch_history_2bit_t, PC);
+	if (it->first == PC){
+		int finalstate = state_2bit[it->second][taken]; // 2D array for calculating next state
+		insert(&branch_history_2bit_t, PC, finalstate);
+	} else {
+		int finalstate = state_2bit[2][taken]; // 2D array for calculating next state, current state is T
+		insert(&branch_history_2bit_t, PC, finalstate);
 	}
 }
 
@@ -145,12 +159,44 @@ bool branchinst(int PC){
 	}
 }
 
+void generate_btb(){
+	// generate branch target buffer
+	for (auto it = PCbincmd.begin(); it != PCbincmd.end(); ++it){
+		string bincmd = it->second;
+	
+		string opcode = "";
+		opcode = opcode + bincmd[25] + bincmd[26] + bincmd[27] + bincmd[28] + bincmd[29] + bincmd[30] + bincmd[31];
+		if (opcode == "1100011"){
+			// conditional branch
+			string imm = "";
+			imm = imm + bincmd[0] + bincmd[24] + bincmd[1] + bincmd[2] + bincmd[3] + bincmd[4] + bincmd[5] + bincmd[6] + bincmd[20] + bincmd[21] + bincmd[22] + bincmd[23] + '0';
+			btb.insert(std::make_pair(it->first, it->first + binstr2dec(imm)));
+			
+		} else if (opcode == "1101111"){
+			// jal instruction
+			string imm = "";
+			imm = imm + bincmd[0] + bincmd[12] + bincmd[13] + bincmd[14] + bincmd[15] + bincmd[16] + bincmd[17] + bincmd[18] + bincmd[19] + bincmd[11] + bincmd[1] + bincmd[2] + bincmd[3] + bincmd[4] + bincmd[5] + bincmd[6] + bincmd[7] + bincmd[8] + bincmd[9] + bincmd[10] + '0';
+			btb.insert(std::make_pair(it->first, it->first + binstr2dec(imm)));
+			
+		}
+	}
+}
+
+void print_btb(){
+	std::cout << "  Look-Up  ->   Branch" << std::endl;
+	for (auto it = btb.begin(); it != btb.end(); ++it){
+		std::cout << "0x" << int2hex_8byte(it->first) << " -> 0x" << int2hex_8byte(it->second) << std::endl; 
+	}
+}
+
 void check_acc_bp(){
 	// using vector<int> PCtrace
 	int pred_static_taken = 0;
 	int pred_static_nottaken = 0;
-	int pred_onebit = 0;
-	int pred_twobit = 0;
+	int pred_onebit_nt = 0;
+	int pred_onebit_t = 0;
+	int pred_twobit_nt = 0;
+	int pred_twobit_t = 0;
 	int total_pred = 0;
 	for (auto it = PCtrace.begin(); it != PCtrace.end(); ++it){
 		if (branchinst(*it)){
@@ -158,21 +204,32 @@ void check_acc_bp(){
 			if (*(it+1) == *it + 4){
 				// branch not taken
 				pred_static_nottaken++;
-				if (!onebit(*it)) pred_onebit++;
+				if (!onebit(*it, 0)) pred_onebit_nt++;
+				if (!onebit(*it, 1)) pred_onebit_t++;
 				feedback_onebit(*it, 0);
-				if (!twobit(*it)) pred_twobit++;
-				feedback_twobit(*it, 0);
+				if (!twobit(*it, 0)) pred_twobit_nt++;
+				if (!twobit(*it, 1)) pred_twobit_t++;
+				feedback_twobit_nt(*it, 0);
+				feedback_twobit_t(*it, 0);
+				
 			} else {
 				// branch taken
 				pred_static_taken++;
-				if (onebit(*it)) pred_onebit++;
+				if (onebit(*it, 0)) pred_onebit_nt++;
+				if (onebit(*it, 1)) pred_onebit_t++;
 				feedback_onebit(*it, 1);
-				if (twobit(*it)) pred_twobit++;
-				feedback_twobit(*it, 1);
+				if (twobit(*it, 0)) pred_twobit_nt++;
+				if (twobit(*it, 1)) pred_twobit_t++;
+				feedback_twobit_nt(*it, 1);
+				feedback_twobit_t(*it, 1);
+				
 			}
 		}
 	}
 	// printing the accuracy
+	std::cout << "\nBranch Target Buffer (BTB):\n";
+	generate_btb();
+	print_btb();
 	std::cout << "\nTotal Static Branch Instructions: " << totalstaticbranchinst() << "\nTotal Dynamic Branch Instructions: " << total_pred;
-	std::cout << "\nAccuracy of the branch predictors are:\nStatic Taken: " << pred_static_taken * 100.0 / total_pred << "%\nStatic Not Taken: " << pred_static_nottaken * 100.0 / total_pred << "%\nDynamic One Bit: " << pred_onebit * 100.0 / total_pred << "%\nDynamic Two Bit: " << pred_twobit * 100.0 / total_pred << "%\n";
+	std::cout << "\nAccuracy of the branch predictors are:\nStatic Taken: " << pred_static_taken * 100.0 / total_pred << "%\nStatic Not Taken: " << pred_static_nottaken * 100.0 / total_pred << "%\nDynamic One Bit (Taken): " << pred_onebit_t * 100.0 / total_pred << "%\nDynamic One Bit (Not Taken): " << pred_onebit_nt * 100.0 / total_pred << "%\nDynamic Two Bit (Taken): " << pred_twobit_t * 100.0 / total_pred << "%\nDynamic Two Bit (Not Taken): " << pred_twobit_nt * 100.0 / total_pred << "%\n";
 }

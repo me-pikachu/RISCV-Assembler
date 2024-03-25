@@ -187,11 +187,21 @@ int memory(int address, int size, bool read, int writedata = 0){
 int decstr2num(string numstr){
 	// this function converts a string of a number to an integer
 	int num = 0;
-	for (int i=0; i<numstr.length(); i++){
-		num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
+	
+	if (numstr[0] == '-'){
+		for (int i=1; i<numstr.length(); i++){
+			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
+		}
+		return -1*num;
+		
+	} else {
+		for (int i=0; i<numstr.length(); i++){
+			num = num * 10 + (numstr[i] - '0') % 10; // numstr[i] - '0' converts the char to digit
+		}
+		return num;
+		
 	}
 	
-	return num;
 }
 
 long long decstr2longdec(string numstr){

@@ -1,5 +1,5 @@
 .data
-n: .word 3
+n: .word 9
 A: .byte 65
 B: .byte 66
 C: .byte 67
